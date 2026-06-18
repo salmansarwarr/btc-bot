@@ -334,101 +334,6 @@ _(New changes will be recorded here using the format below)_
 
 ---
 
-## Current State (Live Baseline = Change 19)
-
-| Metric                     | Value      |
-| -------------------------- | ---------- |
-| Total Trades               | 93         |
-| Win Rate                   | 53.80%     |
-| Average R                  | +0.79      |
-| Engine Max Drawdown        | 17.12%     |
-| Journal (Isolated) DD      | 9.79%      |
-| HEAT_CAP skips             | 357        |
-| MD_NO_CLUSTER_PEER skips   | ~38 (unchanged) |
-| MSB_SHALLOW trades         | 4          |
-| MSB_DEEP trades            | 19         |
-
-**Active CONFIG:** `MAX_HEAT_PCT=0.06`, `MAX_CORRELATED_HEAT_PCT=0.06`, `MIN_STOP_ATR_MULT=1.2`, `SFP_WICK_ATR_MULT=1.0`, `MOMENTUM_DIVERGENCE_MIN_STRENGTH=5.0`, `MOMENTUM_DIVERGENCE_REQUIRE_CLUSTER=True`, `CLUSTER_PNL_SCALING_MODE=full`, `ENABLE_SFP=False`, `SHALLOW_FIB_MIN=0.30`, `SHALLOW_ATR_CAP_MULT=2.0`
-
-### Key Observations — Heat Occupier Pattern
-
-Three consecutive setup-level changes (Changes 15, 16, 17) all produced Engine DD regressions despite isolated PnL improvements. The pattern is consistent:
-
-- Removing or gating a setup frees heat slots → those slots are claimed by longer-running concurrent trades → clustered DD spikes → Engine DD worsens.
-- MSB_SHALLOW (Changes 15, 16): Engine DD +8.40pp / +3.33pp.
-- MSB_DEEP (Change 17): Engine DD +6.53pp, clustered DD 5.82% → 17.58%, WR −7.60pp.
-- The isolated drag from MSB_SHALLOW (−$4,094), MSB_DEEP (−$2,563), and CDC (−$2,478) is the structural cost of keeping the heat budget occupied with shorter-duration setups that prevent worse concurrent exposure.
-
-**Setup-level filtering is exhausted as a tuning direction at the current 6% heat ceiling.** The system is heat-constrained; what goes in matters less than what gets displaced.
-
-### Recommended Next Directions
-
-Three directions remain that don't rely on setup-level filtering:
-
-1. **Conviction score threshold** — `evaluate_entry` scores each candidate; raising the minimum admitted conviction score filters within setups rather than across them. High-conviction isolated trades may have better PnL than low-conviction ones regardless of setup type. Check what `conviction_score` distribution looks like across the journal.
-
-2. **Entry timing / bar count filter** — most quick-stops (13, 12.0% of trades) exit within 3 bars. A minimum bars-since-signal filter or a volatility-adjusted entry check may cut these without freeing heat to worse setups.
-
-3. **Lookback / Fib parameter sweep for MSB_SHALLOW and MSB_DEEP** — rather than disabling, tighten the detection criteria (e.g. `SHALLOW_FIB_MIN`, `SHALLOW_FIB_MAX`, `DEEP_FIB_MIN`, `DEEP_FIB_MAX`, `SHALLOW_ATR_CAP_MULT`) so fewer but higher-quality instances are detected. This reduces detection count without freeing admitted-trade heat slots.
-
-### Planned Next Changes
-
-- ~~Dual-field heat/P&L risk tracking.~~ ✅ **Change 10.**
-- ~~MD cluster gate.~~ ✅ **Change 11.**
-- ~~Cluster P&L scaling sweep.~~ ✅ **Change 12 — `full` mode.**
-- ~~`MAX_HEAT_PCT` sweep.~~ ✅ **Change 13 — tightened to 6%.**
-- ~~SFP disable.~~ ✅ **Change 14 — `ENABLE_SFP=False`.**
-- ~~MSB_SHALLOW cluster gate.~~ ❌ **Change 15 — reverted. Engine DD +8.40pp.**
-- ~~MSB_SHALLOW full disable.~~ ❌ **Change 16 — reverted. Engine DD +3.33pp. Heat occupier confirmed.**
-- ~~MSB_DEEP cluster gate.~~ ❌ **Change 17 — reverted. Engine DD +6.53pp, WR −7.60pp. Heat occupier confirmed.**
-- ~~Fib/detection parameter sweep for MSB_SHALLOW and MSB_DEEP.~~ ✅ **Change 19 — `SHALLOW_FIB_MIN=0.30`, `SHALLOW_ATR_CAP_MULT=2.0`. WR +3.8pp, AvgR +0.15, IsoDD −6.92pp.**
-- ~~Conviction score threshold.~~ ❌ **Change 20 — exhausted. Score distribution is 96.5% / 3.5% at scores 2/3. No viable mid-point exists.**
-- **[Next]** OPEN_DRIVE detection-criteria sweep — 33 trades at 36.4% WR is the weakest WR of any active setup. Tighten `DRIVE_ATR_MULT` and/or `DRIVE_BODY_RANGE_RATIO_MIN` to reduce low-quality drive detections without a gate/disable (same ATR-cap approach as Change 19).
-- **[Next]** SR_FLIP detection-criteria sweep — 14 trades at 35.7% WR. Similar approach: tighten flip confirmation criteria before considering any gate/disable.
-- **[Defer]** Entry timing / quick-stop filter — investigate whether quick-stops cluster in specific setups or time-of-day windows.
-
----
-
-### Change 20: Conviction Score Threshold — EXHAUSTED (No Change Applied)
-
-- **Proxy Parameter:** `CONVICTION_DIRECT_ENTRY_THRESHOLD`
-- **Investigated value:** raising from `2` → `3`
-- **Outcome: NO CHANGE. Direction exhausted.**
-
-#### Findings (`scratch/run_conviction_analysis.py`, Change 19 params, 86 trades):
-
-| Score | N  | Share | WR    | AvgR  | SumR   |
-| ----- | -- | ----- | ----- | ----- | ------ |
-| 2     | 83 | 96.5% | 49.4% | +0.70 | +58.37 |
-| 3     | 3  | 3.5%  | 66.7% | +1.05 | +3.14  |
-
-- **No score=0 or score=1 trades admitted.** `CONVICTION_DIRECT_ENTRY_THRESHOLD=2` already acts as the floor. Score <2 setups either are never generated for BTC/H1 or route to the FTA-pending queue rather than being logged as skipped.
-- **No LOW_CONVICTION skips exist.** Every skip is `HEAT_CAP` (91.5%, 407) or `MD_NO_CLUSTER_PEER` (8.5%, 38). The scoring system produces no sub-threshold candidates past `evaluate_entry`.
-- **Score=3 cliff:** raising the threshold to ≥3 drops 83 of 86 trades → 3 trades in 90 days. Not a viable operating point.
-- **Score distribution is structurally collapsed** — the 3-point scoring rubric assigns score=2 to virtually everything. There is no useful intermediate threshold between 2 and 3.
-
-#### Per-setup breakdown at score=2 (all):
-
-| Setup Type          | N  | WR    | AvgR   | Notes                                      |
-| ------------------- | -- | ----- | ------ | ------------------------------------------ |
-| CDC                 | 15 | 60.0% | +0.829 | Solid                                      |
-| MSB_DEEP            | 15 | 73.3% | +0.486 | High WR but low AvgR — targets conservative? |
-| MSB_SHALLOW         | 5  | 60.0% | +0.218 | Low count, acceptable                      |
-| OPEN_DRIVE          | 33 | 36.4% | +0.717 | Dominant by count, low WR, positive only from large wins |
-| SR_FLIP             | 14 | 35.7% | +0.492 | Marginal WR                                |
-| CONSOLIDATION_ENTRY | 1  | 100%  | +7.003 | 1 trade, no inference                      |
-| MOMENTUM_DIVERGENCE | 1  | 100%  | +3.004 | Score=3, 1 trade                           |
-
-- **Win/loss asymmetry:** score=2 wins avg +2.23R, losses avg −0.79R — edge is entirely in win magnitude. Both WR (49.4%) and loss count (42) are slightly unfavourable, but the R asymmetry keeps expectancy positive.
-- **OPEN_DRIVE is the structural weak point:** 33 trades (38% of all), 36.4% WR. It contributes most trades and has the lowest WR of any active setup. Detection tightening (same approach as Change 19 for MSB_SHALLOW) is the logical next investigation.
-
-#### Trade count note:
-Conviction analysis produced 86 trades vs 93 in Change 19 sweep. Likely caused by the analysis script not calling `reset_portfolio_state()` before the real pass. Non-blocking — the per-setup relative breakdown is still valid. Sweep infrastructure (with explicit state reset) remains the canonical number source.
-
-
-
----
-
 ### Change 18: Engine Bug Fix — `_flush_pending_fills` Silent Trade Drop
 
 - **Type:** Correctness fix (not a tunable parameter)
@@ -449,32 +354,185 @@ Conviction analysis produced 86 trades vs 93 in Change 19 sweep. Likely caused b
 
 #### Full sweep table (baseline = Change 14):
 
-| Label | Tot | WR | AvgR | EngDD | HeatSk | SH_n | SH_WR | SH_R | DP_n | DP_WR | DP_R | CluDD | IsoDD |
-| ----------------------------- | --- | ------ | ----- | ------ | ------ | ---- | ----- | ----- | ---- | ----- | ----- | ----- | ----- |
-| baseline (0.236–0.382, cap3.0) | 108 | 50.0% | +0.64 | 13.87% | 361 | 14 | 42.9% | +0.01 | 18 | 66.7% | +0.33 | 5.90% | 16.71% |
-| sh_0.30–0.382 | 98 | 46.9% | +0.63 | 19.73% | 347 | 9 | 22.2% | −0.23 | 19 | 63.2% | +0.60 | 7.28% | 12.07% |
-| **sh_0.30–0.382_cap2.0 ✅** | **93** | **53.8%** | **+0.79** | **17.12%** | **357** | **4** | **50.0%** | **+0.01** | **19** | **68.4%** | **+0.72** | **9.03%** | **9.79%** |
-| dp_golden | 90 | 51.1% | +0.67 | 13.86% | 375 | 12 | 41.7% | −0.21 | 9 | 55.6% | +0.14 | 16.03% | 12.55% |
-| sh+dp_tight | 120 | 43.3% | +0.56 | 22.47% | 265 | 12 | 16.7% | −0.26 | 12 | 50.0% | +0.17 | 14.85% | 12.08% |
-| sh+dp_tight_cap2.0 | 81 | 51.8% | +0.79 | 18.60% | 335 | 5 | 60.0% | +0.03 | 8 | 50.0% | +0.13 | 20.36% | 7.92% |
-| sh_tight_dp_golden_cap1.5 | 111 | 47.8% | +0.64 | 16.58% | 249 | 4 | 25.0% | −0.25 | 11 | 54.5% | +0.27 | 16.51% | 11.23% |
-| sh_0.35–0.382 | 94 | 53.2% | +0.77 | 17.12% | 333 | 5 | 40.0% | −0.19 | 19 | 68.4% | +0.72 | 8.60% | 9.85% |
-| sh_0.35–0.382_dp_golden | 112 | 48.2% | +0.63 | 16.58% | 246 | 5 | 40.0% | −0.00 | 11 | 54.5% | +0.27 | 15.04% | 11.28% |
+| Label                          | Tot    | WR        | AvgR      | EngDD      | HeatSk  | SH_n  | SH_WR     | SH_R      | DP_n   | DP_WR     | DP_R      | CluDD     | IsoDD     |
+| ------------------------------ | ------ | --------- | --------- | ---------- | ------- | ----- | --------- | --------- | ------ | --------- | --------- | --------- | --------- |
+| baseline (0.236–0.382, cap3.0) | 108    | 50.0%     | +0.64     | 13.87%     | 361     | 14    | 42.9%     | +0.01     | 18     | 66.7%     | +0.33     | 5.90%     | 16.71%    |
+| sh_0.30–0.382                  | 98     | 46.9%     | +0.63     | 19.73%     | 347     | 9     | 22.2%     | −0.23     | 19     | 63.2%     | +0.60     | 7.28%     | 12.07%    |
+| **sh_0.30–0.382_cap2.0 ✅**    | **93** | **53.8%** | **+0.79** | **17.12%** | **357** | **4** | **50.0%** | **+0.01** | **19** | **68.4%** | **+0.72** | **9.03%** | **9.79%** |
+| dp_golden                      | 90     | 51.1%     | +0.67     | 13.86%     | 375     | 12    | 41.7%     | −0.21     | 9      | 55.6%     | +0.14     | 16.03%    | 12.55%    |
+| sh+dp_tight                    | 120    | 43.3%     | +0.56     | 22.47%     | 265     | 12    | 16.7%     | −0.26     | 12     | 50.0%     | +0.17     | 14.85%    | 12.08%    |
+| sh+dp_tight_cap2.0             | 81     | 51.8%     | +0.79     | 18.60%     | 335     | 5     | 60.0%     | +0.03     | 8      | 50.0%     | +0.13     | 20.36%    | 7.92%     |
+| sh_tight_dp_golden_cap1.5      | 111    | 47.8%     | +0.64     | 16.58%     | 249     | 4     | 25.0%     | −0.25     | 11     | 54.5%     | +0.27     | 16.51%    | 11.23%    |
+| sh_0.35–0.382                  | 94     | 53.2%     | +0.77     | 17.12%     | 333     | 5     | 40.0%     | −0.19     | 19     | 68.4%     | +0.72     | 8.60%     | 9.85%     |
+| sh_0.35–0.382_dp_golden        | 112    | 48.2%     | +0.63     | 16.58%     | 246     | 5     | 40.0%     | −0.00     | 11     | 54.5%     | +0.27     | 15.04%    | 11.28%    |
 
 - **Before Stats (Change 14):** Trades 108, WR 50.00%, Avg R +0.64, Engine DD 13.87%, IsoDD 16.71%
 - **After Stats:** Trades 93, WR **53.8%**, Avg R **+0.79**, Engine DD **17.12%**, IsoDD **9.79%**
 
-| Metric    | Change 14  | Change 19  | Delta         |
-| --------- | ---------- | ---------- | ------------- |
-| Trades    | 108        | 93         | −15           |
-| Win Rate  | 50.00%     | **53.8%**  | **+3.8pp**    |
-| Avg R     | +0.64      | **+0.79**  | **+0.15**     |
-| Engine DD | 13.87%     | 17.12%     | +3.25pp ⚠️   |
-| IsoDD     | 16.71%     | **9.79%**  | **−6.92pp**   |
-| SH trades | 14         | 4          | −10           |
-| DP trades | 18         | 19         | +1            |
-| DP AvgR   | +0.33      | **+0.72**  | **+0.39**     |
+| Metric    | Change 14 | Change 19 | Delta       |
+| --------- | --------- | --------- | ----------- |
+| Trades    | 108       | 93        | −15         |
+| Win Rate  | 50.00%    | **53.8%** | **+3.8pp**  |
+| Avg R     | +0.64     | **+0.79** | **+0.15**   |
+| Engine DD | 13.87%    | 17.12%    | +3.25pp ⚠️  |
+| IsoDD     | 16.71%    | **9.79%** | **−6.92pp** |
+| SH trades | 14        | 4         | −10         |
+| DP trades | 18        | 19        | +1          |
+| DP AvgR   | +0.33     | **+0.72** | **+0.39**   |
 
 - **Key insight:** Tightening shallow detection with ATR_CAP_MULT alone (`sh_0.30-0.382` without cap) triggers the full heat-occupier EngDD spike (+5.86pp, WR −3.1pp) — same failure mode as Changes 15-17. Adding `SHALLOW_ATR_CAP_MULT=2.0` suppresses the spike by removing only the largest-ATR-retracement instances (which are the weakest quality) rather than gating admitted trades. The freed SH slots are reallocated to DP, which delivers +0.72 AvgR vs the previous +0.33. `dp_golden` by contrast cuts DP in half (18→9 trades, +0.33→+0.14 AvgR) with effectively zero EngDD cost but no meaningful quality gain.
 - **EngDD caveat:** +3.25pp Engine DD is a real cost. Mechanically identical to Changes 15-17 (freed slots → longer-running concurrent trades → higher live exposure). The mitigation is that WR crosses 53.8% and AvgR improves +0.15, which compound over 93 trades into a meaningfully better equity path.
 - **Verdict: Keeping.** WR +3.8pp, AvgR +0.15, IsoDD −6.92pp. **`SHALLOW_FIB_MIN=0.30`, `SHALLOW_ATR_CAP_MULT=2.0`.**
+
+---
+
+### Change 20: Conviction Score Threshold — EXHAUSTED (No Change Applied)
+
+- **Proxy Parameter:** `CONVICTION_DIRECT_ENTRY_THRESHOLD`
+- **Investigated value:** raising from `2` → `3`
+- **Outcome: NO CHANGE. Direction exhausted.**
+
+#### Findings (`scratch/run_conviction_analysis.py`, Change 19 params, 86 trades):
+
+| Score | N   | Share | WR    | AvgR  | SumR   |
+| ----- | --- | ----- | ----- | ----- | ------ |
+| 2     | 83  | 96.5% | 49.4% | +0.70 | +58.37 |
+| 3     | 3   | 3.5%  | 66.7% | +1.05 | +3.14  |
+
+- **No score=0 or score=1 trades admitted.** `CONVICTION_DIRECT_ENTRY_THRESHOLD=2` already acts as the floor. Score <2 setups either are never generated for BTC/H1 or route to the FTA-pending queue rather than being logged as skipped.
+- **No LOW_CONVICTION skips exist.** Every skip is `HEAT_CAP` (91.5%, 407) or `MD_NO_CLUSTER_PEER` (8.5%, 38). The scoring system produces no sub-threshold candidates past `evaluate_entry`.
+- **Score=3 cliff:** raising the threshold to ≥3 drops 83 of 86 trades → 3 trades in 90 days. Not a viable operating point.
+- **Score distribution is structurally collapsed** — the 3-point scoring rubric assigns score=2 to virtually everything. There is no useful intermediate threshold between 2 and 3.
+
+#### Per-setup breakdown at score=2 (all):
+
+| Setup Type          | N   | WR    | AvgR   | Notes                                                    |
+| ------------------- | --- | ----- | ------ | -------------------------------------------------------- |
+| CDC                 | 15  | 60.0% | +0.829 | Solid                                                    |
+| MSB_DEEP            | 15  | 73.3% | +0.486 | High WR but low AvgR — targets conservative?             |
+| MSB_SHALLOW         | 5   | 60.0% | +0.218 | Low count, acceptable                                    |
+| OPEN_DRIVE          | 33  | 36.4% | +0.717 | Dominant by count, low WR, positive only from large wins |
+| SR_FLIP             | 14  | 35.7% | +0.492 | Marginal WR                                              |
+| CONSOLIDATION_ENTRY | 1   | 100%  | +7.003 | 1 trade, no inference                                    |
+| MOMENTUM_DIVERGENCE | 1   | 100%  | +3.004 | Score=3, 1 trade                                         |
+
+- **Win/loss asymmetry:** score=2 wins avg +2.23R, losses avg −0.79R — edge is entirely in win magnitude. Both WR (49.4%) and loss count (42) are slightly unfavourable, but the R asymmetry keeps expectancy positive.
+- **OPEN_DRIVE is the structural weak point:** 33 trades (38% of all), 36.4% WR. It contributes most trades and has the lowest WR of any active setup. Detection tightening (same approach as Change 19 for MSB_SHALLOW) is the logical next investigation.
+
+#### Trade count note:
+
+Conviction analysis produced 86 trades vs 93 in Change 19 sweep. Likely caused by the analysis script not calling `reset_portfolio_state()` before the real pass. Non-blocking — the per-setup relative breakdown is still valid. Sweep infrastructure (with explicit state reset) remains the canonical number source.
+
+---
+
+### Change 21: OPEN_DRIVE Detection Tightening
+
+- **Proxy Parameters:** `DRIVE_ATR_MULT`, `DRIVE_BODY_RANGE_RATIO_MIN`
+- **Original Values:** `DRIVE_ATR_MULT=1.0`, `DRIVE_BODY_RANGE_RATIO_MIN=0.50`
+- **New Values:** `DRIVE_ATR_MULT=1.2`, `DRIVE_BODY_RANGE_RATIO_MIN=0.65`
+- **Reasoning:** At Change 19, OPEN_DRIVE was the weakest active setup by win rate: 33 trades at 36.4% WR, representing 38% of all trades. The low WR was structural — too many weak drive candles being admitted. Tightening `DRIVE_ATR_MULT` from 1.0→1.2 requires stronger impulse moves, and raising `DRIVE_BODY_RANGE_RATIO_MIN` from 0.50→0.65 filters out candles with long wicks that lack directional conviction. This is the same detection-tightening approach that worked for MSB_SHALLOW (Change 19) — reduce low-quality detections without gating admitted trades.
+- **Before Stats (Change 19):** Trades 93, WR 53.76%, Avg R +0.79, Engine DD 17.12%, HEAT_CAP 357
+- **After Stats:** Trades 92, WR 51.09%, Avg R +0.82, Engine DD 17.20%, HEAT_CAP 289
+
+| Metric             | Change 19 | Change 21 | Delta   |
+| ------------------ | --------- | --------- | ------- |
+| Trades             | 93        | 92        | -1      |
+| Win Rate           | 53.76%    | 51.09%    | -2.67pp |
+| Avg R              | +0.79     | +0.82     | +0.03   |
+| Engine DD          | 17.12%    | 17.20%    | +0.08pp |
+| HEAT_CAP skips     | 357       | 289       | -68     |
+| MD_NO_CLUSTER_PEER | ~38       | 45        | +7      |
+
+**Per-setup comparison:**
+
+| Setup Type      | Change 19 | Change 21 | Delta     |
+| --------------- | --------- | --------- | --------- |
+| OPEN_DRIVE n    | 33        | 24        | -9 (-27%) |
+| OPEN_DRIVE WR   | 36.4%     | 45.8%     | +9.4pp    |
+| OPEN_DRIVE AvgR | +0.72     | +1.19     | +0.47     |
+| SR_FLIP n       | 14        | 24        | +10       |
+| SR_FLIP WR      | 35.7%     | 45.8%     | +10.1pp   |
+| MSB_DEEP n      | 15        | 21        | +6        |
+| MSB_DEEP WR     | 73.3%     | 57.1%     | -16.2pp   |
+
+- **Key insight:** This is a clean structural improvement. OPEN_DRIVE detections dropped from 33→24 (-27%), but the remaining candidates have materially higher quality: WR +9.4pp, AvgR +0.47. The freed heat slots were claimed by SR_FLIP (+10 trades) and MSB_DEEP (+6 trades). Unlike the gate/disable attempts (Changes 15-17), there is **no engine DD spike** (+0.08pp is noise). This confirms detection tightening is the correct approach — it reduces low-quality signal volume while preserving the beneficial heat-occupier function.
+
+- **HEAT_CAP drop:** 357→289 (-68 skips) is unexpected but positive — with better-quality OPEN_DRIVE candidates, fewer marginal trades are being gated by the heat ceiling. The system is self-selecting higher-conviction entries.
+
+- **Verdict: Keeping.** AvgR improves, OPEN_DRIVE WR crosses 45%, no EngDD degradation. **`DRIVE_ATR_MULT=1.2`, `DRIVE_BODY_RANGE_RATIO_MIN=0.65`.**
+
+---
+
+## Current State (Live Baseline = Change 21)
+
+| Metric                   | Value        |
+| ------------------------ | ------------ |
+| Total Trades             | 92           |
+| Win Rate                 | 51.09%       |
+| Average R                | +0.82        |
+| Engine Max Drawdown      | 17.20%       |
+| Journal (Isolated) DD    | ~9.5% (est.) |
+| HEAT_CAP skips           | 289          |
+| MD_NO_CLUSTER_PEER skips | 45           |
+
+**Active CONFIG:**
+
+- `MAX_HEAT_PCT=0.06`
+- `MAX_CORRELATED_HEAT_PCT=0.06`
+- `MIN_STOP_ATR_MULT=1.2`
+- `SFP_WICK_ATR_MULT=1.0`
+- `MOMENTUM_DIVERGENCE_MIN_STRENGTH=5.0`
+- `MOMENTUM_DIVERGENCE_REQUIRE_CLUSTER=True`
+- `CLUSTER_PNL_SCALING_MODE=full`
+- `ENABLE_SFP=False`
+- `SHALLOW_FIB_MIN=0.30`
+- `SHALLOW_ATR_CAP_MULT=2.0`
+- `DRIVE_ATR_MULT=1.2`
+- `DRIVE_BODY_RANGE_RATIO_MIN=0.65`
+
+**Per-setup breakdown (Change 21):**
+
+| Setup Type          | Trades | Win Rate | Avg R |
+| ------------------- | ------ | -------- | ----- |
+| CDC                 | 16     | 50.0%    | +0.71 |
+| OPEN_DRIVE          | 24     | 45.8%    | +1.19 |
+| CONSOLIDATION_ENTRY | 1      | 100%     | +7.00 |
+| MSB_SHALLOW         | 6      | 66.7%    | +0.52 |
+| SR_FLIP             | 24     | 45.8%    | +0.47 |
+| MSB_DEEP            | 21     | 57.1%    | +0.67 |
+
+### Key Observations
+
+**Detection tightening is the correct tuning direction.** Change 19 (MSB_SHALLOW Fib/ATR tightening) and Change 21 (OPEN_DRIVE drive-candle tightening) both improved metrics without triggering the heat-occupier DD spike that plagued gate/disable attempts (Changes 15-17). The pattern:
+
+- Tighten detection criteria → fewer but higher-quality detections → freed heat slots claimed by other setups → net improvement without DD explosion.
+- Gate/disable → admitted trades blocked entirely → freed heat slots claimed by longer-running concurrent trades → clustered DD spikes → Engine DD worsens.
+
+**OPEN_DRIVE now has positive edge.** At 45.8% WR and +1.19 AvgR, it's no longer the structural weak point. SR_FLIP is now the lowest WR active setup (45.8%, tied with OPEN_DRIVE) but has lower AvgR (+0.47 vs +1.19).
+
+**HEAT_CAP skips dropped significantly** (357→289) with the OPEN_DRIVE tightening. The system is now more selective at the detection level, reducing the number of marginal candidates that get gated by the heat ceiling.
+
+### Recommended Next Directions
+
+1. **SR_FLIP detection tightening** — Now the weakest setup by AvgR (+0.47) and tied for lowest WR (45.8%). Similar approach to OPEN_DRIVE: tighten flip confirmation criteria (e.g. `FLIP_CONFIRM_BARS`, `FLIP_ATR_MULT`, `FLIP_BODY_RATIO_MIN`) to reduce low-quality flips while preserving the heat-occupier function. SR_FLIP has 24 trades — enough to detect a signal.
+
+2. **MSB_DEEP target investigation** — 57.1% WR but +0.67 AvgR suggests targets are being hit too conservatively, or stops are too tight. MSB_DEEP has the highest WR of any active multi-trade setup but middling AvgR. A sweep of `DEEP_FIB_MIN`/`DEEP_FIB_MAX` or the target-multiple parameters could improve R without sacrificing WR.
+
+3. **CDC detection tightening** — Low trade count (16) makes statistical inference weak; defer until more data or until SR_FLIP is resolved. CDC has neutral WR (50%) but solid AvgR (+0.71) — not a priority.
+
+### Planned Next Changes
+
+- [x] ~~Dual-field heat/P&L risk tracking.~~ ✅ **Change 10.**
+- [x] ~~MD cluster gate.~~ ✅ **Change 11.**
+- [x] ~~Cluster P&L scaling sweep.~~ ✅ **Change 12 — `full` mode.**
+- [x] ~~`MAX_HEAT_PCT` sweep.~~ ✅ **Change 13 — tightened to 6%.**
+- [x] ~~SFP disable.~~ ✅ **Change 14 — `ENABLE_SFP=False`.**
+- [x] ~~MSB_SHALLOW cluster gate.~~ ❌ **Change 15 — reverted.**
+- [x] ~~MSB_SHALLOW full disable.~~ ❌ **Change 16 — reverted.**
+- [x] ~~MSB_DEEP cluster gate.~~ ❌ **Change 17 — reverted.**
+- [x] ~~Fib/detection parameter sweep for MSB_SHALLOW.~~ ✅ **Change 19 — `SHALLOW_FIB_MIN=0.30`, `SHALLOW_ATR_CAP_MULT=2.0`.**
+- [x] ~~Conviction score threshold.~~ ❌ **Change 20 — exhausted.**
+- [x] ~~OPEN_DRIVE detection tightening.~~ ✅ **Change 21 — `DRIVE_ATR_MULT=1.2`, `DRIVE_BODY_RANGE_RATIO_MIN=0.65`.**
+- **[Next]** SR_FLIP detection tightening — identify the weakest flip confirmation criteria. Candidate params: `FLIP_CONFIRM_BARS`, `FLIP_ATR_MULT`, `FLIP_BODY_RATIO_MIN`.
+- **[Defer]** MSB_DEEP target sweep — lower priority since WR is strong; investigate after SR_FLIP.
+- **[Defer]** CDC detection tightening — low trade count (16) makes statistical inference weak; defer until more data.

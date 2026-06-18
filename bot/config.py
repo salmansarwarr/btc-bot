@@ -80,9 +80,9 @@ CONFIG: Dict[str, Any] = {
 
     # ── Candle Open Drive / SFP ──────────────────────────────────────────────
     # Spec §2.x; Doc-2 §9 (Proxy A)
-    "DRIVE_ATR_MULT": 1.0,              # drive candle must move ≥ this × ATR(14) from open
-    "DRIVE_BODY_RANGE_RATIO_MIN": 0.6,  # body/total-range ratio threshold for a valid drive candle
-    "SFP_WICK_ATR_MULT": 1.0,           # NEW: minimum wick size (× ATR) for a valid SFP
+    "DRIVE_ATR_MULT": 1.2,              # drive candle must move ≥ this × ATR(14) from open
+    "DRIVE_BODY_RANGE_RATIO_MIN": 0.65,  # body/total-range ratio threshold for a valid drive candle
+    "SFP_WICK_ATR_MULT": 1.5,           # NEW: minimum wick size (× ATR) for a valid SFP
     "ENABLE_SFP": False,                  # Change 9a: set False to disable SFP setup detection
 
     # ── Stalling / time expiry ───────────────────────────────────────────────

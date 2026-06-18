@@ -1,0 +1,266 @@
+1. BTC
+
+--- SUMMARY STATS ---
+Total Trades:      92
+Win Rate:          51.09%
+Average R:         0.82
+Max Drawdown:      17.20%
+Quick full-stops (≤3 bars): 14
+
+Win rate & avg R by setup type:
+  CDC                       WR: 50.0%  AvgR: +0.71  (16 trades)
+  OPEN_DRIVE                WR: 45.8%  AvgR: +1.19  (24 trades)
+  CONSOLIDATION_ENTRY       WR: 100.0%  AvgR: +7.00  (1 trades)
+  MSB_SHALLOW               WR: 66.7%  AvgR: +0.52  (6 trades)
+  SR_FLIP                   WR: 45.8%  AvgR: +0.47  (24 trades)
+  MSB_DEEP                  WR: 57.1%  AvgR: +0.67  (21 trades)
+
+Setups Triggered by Type:
+  CDC: 16
+  OPEN_DRIVE: 24
+  CONSOLIDATION_ENTRY: 1
+  MSB_SHALLOW: 6
+  SR_FLIP: 24
+  MSB_DEEP: 21
+
+Skipped by Reason:
+  HEAT_CAP: 289
+  MD_NO_CLUSTER_PEER: 45
+
+Full journal written to trade_journal.csv
+
+--- SAMPLE OF CLOSED TRADES (up to 20) ---
+ 1. UP   CDC                  | Entry: 2026-03-15 02:00 @ 70985.84 | Exit: 2026-03-15 16:00 @ 71446.89 | R: +1.23
+ 2. DOWN OPEN_DRIVE           | Entry: 2026-03-15 19:00 @ 71390.53 | Exit: 2026-03-15 21:00 @ 71779.85 | R: -1.00
+ 3. UP   OPEN_DRIVE           | Entry: 2026-03-15 00:00 @ 71211.95 | Exit: 2026-03-16 06:00 @ 73833.18 | R: +7.00
+ 4. UP   CONSOLIDATION_ENTRY  | Entry: 2026-03-15 00:00 @ 71211.95 | Exit: 2026-03-16 06:00 @ 73833.18 | R: +7.00
+ 5. UP   MSB_SHALLOW          | Entry: 2026-03-16 00:00 @ 72815.25 | Exit: 2026-03-17 05:00 @ 74247.66 | R: +1.04
+ 6. UP   OPEN_DRIVE           | Entry: 2026-03-17 15:00 @ 74381.69 | Exit: 2026-03-18 11:00 @ 73573.11 | R: -1.00
+ 7. UP   SR_FLIP              | Entry: 2026-03-16 10:00 @ 73260.92 | Exit: 2026-03-18 14:00 @ 71902.41 | R: -1.00
+ 8. UP   MSB_DEEP             | Entry: 2026-03-17 00:00 @ 74884.67 | Exit: 2026-03-27 00:00 @ 66704.55 | R: -1.00
+ 9. UP   SR_FLIP              | Entry: 2026-03-21 00:00 @ 70510.73 | Exit: 2026-03-27 00:00 @ 67120.19 | R: -1.00
+10. DOWN CDC                  | Entry: 2026-03-27 03:00 @ 68903.58 | Exit: 2026-03-27 23:00 @ 66177.75 | R: +2.75
+11. DOWN SR_FLIP              | Entry: 2026-03-27 03:00 @ 68903.58 | Exit: 2026-03-27 23:00 @ 66177.75 | R: +5.00
+12. DOWN MSB_DEEP             | Entry: 2026-03-27 03:00 @ 68903.58 | Exit: 2026-03-28 07:00 @ 66467.13 | R: +2.92
+13. DOWN OPEN_DRIVE           | Entry: 2026-03-29 00:00 @ 66377.04 | Exit: 2026-03-29 02:00 @ 66744.93 | R: -1.00
+14. DOWN MSB_DEEP             | Entry: 2026-03-29 05:00 @ 66735.14 | Exit: 2026-03-29 21:00 @ 66710.12 | R: +0.06
+15. DOWN SR_FLIP              | Entry: 2026-03-29 05:00 @ 66735.14 | Exit: 2026-03-29 21:00 @ 66710.12 | R: +0.07
+16. DOWN SR_FLIP              | Entry: 2026-03-30 19:00 @ 66653.45 | Exit: 2026-03-31 01:00 @ 67229.18 | R: -1.00
+17. DOWN CDC                  | Entry: 2026-03-30 23:00 @ 66784.97 | Exit: 2026-03-31 01:00 @ 67311.26 | R: -1.00
+18. DOWN OPEN_DRIVE           | Entry: 2026-03-31 10:00 @ 66125.00 | Exit: 2026-03-31 13:00 @ 66754.57 | R: -1.00
+19. DOWN SR_FLIP              | Entry: 2026-03-31 09:00 @ 66778.34 | Exit: 2026-03-31 16:00 @ 67422.09 | R: -1.00
+20. DOWN SR_FLIP              | Entry: 2026-04-01 19:00 @ 68084.76 | Exit: 2026-04-02 14:00 @ 66681.85 | R: +2.23
+
+2. ETH
+
+--- ETH SUMMARY STATS ---
+Total Trades:      99
+Win Rate:          50.51%
+Average R:         0.63
+Max Drawdown:      19.54%
+Quick full-stops (≤3 bars): 18
+
+Win rate & avg R by setup type:
+  CDC                       WR: 47.1%  AvgR: +0.37  (17 trades)
+  MSB_DEEP                  WR: 63.6%  AvgR: +0.34  (22 trades)
+  OPEN_DRIVE                WR: 43.3%  AvgR: +0.83  (30 trades)
+  MSB_SHALLOW               WR: 40.0%  AvgR: +0.01  (5 trades)
+  SR_FLIP                   WR: 54.2%  AvgR: +1.04  (24 trades)
+  MOMENTUM_DIVERGENCE       WR: 0.0%  AvgR: -1.00  (1 trades)
+
+Setups Triggered by Type:
+  CDC: 17
+  MSB_DEEP: 22
+  OPEN_DRIVE: 30
+  MSB_SHALLOW: 5
+  SR_FLIP: 24
+  MOMENTUM_DIVERGENCE: 1
+
+Skipped by Reason:
+  HEAT_CAP: 128
+  MD_NO_CLUSTER_PEER: 42
+
+Full journal written to trade_journal_ETH.csv
+
+--- SAMPLE OF CLOSED TRADES (up to 20) ---
+ 1. UP   CDC                  | Entry: 2026-03-15 02:00 @ 2088.32 | Exit: 2026-03-15 13:00 @ 2105.05 | R: +1.15
+ 2. UP   MSB_DEEP             | Entry: 2026-03-15 02:00 @ 2088.32 | Exit: 2026-03-15 13:00 @ 2105.05 | R: +1.15
+ 3. UP   OPEN_DRIVE           | Entry: 2026-03-15 18:00 @ 2110.77 | Exit: 2026-03-16 06:00 @ 2264.88 | R: +9.89
+ 4. UP   CDC                  | Entry: 2026-03-16 02:00 @ 2185.88 | Exit: 2026-03-16 07:00 @ 2255.88 | R: +2.85
+ 5. UP   CDC                  | Entry: 2026-03-16 10:00 @ 2260.51 | Exit: 2026-03-16 15:00 @ 2273.88 | R: +0.44
+ 6. UP   MSB_DEEP             | Entry: 2026-03-17 07:00 @ 2315.35 | Exit: 2026-03-17 19:00 @ 2320.22 | R: +0.12
+ 7. UP   OPEN_DRIVE           | Entry: 2026-03-17 00:00 @ 2352.97 | Exit: 2026-03-18 00:00 @ 2214.77 | R: -1.00
+ 8. UP   MSB_SHALLOW          | Entry: 2026-03-16 02:00 @ 2185.88 | Exit: 2026-03-18 15:00 @ 2187.66 | R: +0.02
+ 9. UP   OPEN_DRIVE           | Entry: 2026-03-19 10:00 @ 2189.43 | Exit: 2026-03-19 12:00 @ 2161.04 | R: -1.00
+10. UP   MSB_DEEP             | Entry: 2026-03-20 11:00 @ 2148.38 | Exit: 2026-03-20 22:00 @ 2154.71 | R: +0.15
+11. UP   SR_FLIP              | Entry: 2026-03-20 11:00 @ 2148.38 | Exit: 2026-03-20 22:00 @ 2154.71 | R: +0.24
+12. UP   CDC                  | Entry: 2026-03-21 00:00 @ 2146.21 | Exit: 2026-03-26 00:00 @ 2060.43 | R: -0.29
+13. UP   MSB_DEEP             | Entry: 2026-03-21 00:00 @ 2146.21 | Exit: 2026-03-27 00:00 @ 2006.90 | R: -1.00
+14. UP   SR_FLIP              | Entry: 2026-03-21 00:00 @ 2146.21 | Exit: 2026-03-27 00:00 @ 2006.90 | R: -1.00
+15. DOWN CDC                  | Entry: 2026-03-27 13:00 @ 1989.45 | Exit: 2026-03-27 18:00 @ 1984.43 | R: +0.21
+16. DOWN OPEN_DRIVE           | Entry: 2026-03-27 11:00 @ 1991.67 | Exit: 2026-03-27 21:00 @ 1985.73 | R: +0.25
+17. DOWN CDC                  | Entry: 2026-03-29 00:00 @ 1994.74 | Exit: 2026-03-29 03:00 @ 2010.02 | R: -0.96
+18. DOWN OPEN_DRIVE           | Entry: 2026-03-29 00:00 @ 1994.74 | Exit: 2026-03-29 03:00 @ 2010.02 | R: -1.00
+19. DOWN SR_FLIP              | Entry: 2026-03-29 00:00 @ 1994.74 | Exit: 2026-03-29 10:00 @ 1995.84 | R: -0.05
+20. DOWN OPEN_DRIVE           | Entry: 2026-03-29 14:00 @ 1987.09 | Exit: 2026-03-29 20:00 @ 2001.09 | R: -1.00
+
+3. SOL
+
+--- SOL SUMMARY STATS ---
+Total Trades:      144
+Win Rate:          43.75%
+Average R:         0.29
+Max Drawdown:      17.61%
+Quick full-stops (≤3 bars): 23
+
+Win rate & avg R by setup type:
+  CDC                       WR: 45.8%  AvgR: -0.25  (24 trades)
+  OPEN_DRIVE                WR: 33.3%  AvgR: +0.05  (33 trades)
+  MSB_SHALLOW               WR: 35.3%  AvgR: -0.40  (17 trades)
+  SR_FLIP                   WR: 50.0%  AvgR: +0.73  (38 trades)
+  MSB_DEEP                  WR: 53.3%  AvgR: +0.88  (30 trades)
+  MOMENTUM_DIVERGENCE       WR: 0.0%  AvgR: -1.00  (2 trades)
+
+Setups Triggered by Type:
+  CDC: 24
+  OPEN_DRIVE: 33
+  MSB_SHALLOW: 17
+  SR_FLIP: 38
+  MSB_DEEP: 30
+  MOMENTUM_DIVERGENCE: 2
+
+Skipped by Reason:
+  HEAT_CAP: 55
+  MD_NO_CLUSTER_PEER: 44
+
+Full journal written to trade_journal_SOL.csv
+
+--- SAMPLE OF CLOSED TRADES (up to 20) ---
+ 1. UP   CDC                  | Entry: 2026-03-15 03:00 @ 88.30 | Exit: 2026-03-15 08:00 @ 88.50 | R: +0.18
+ 2. UP   OPEN_DRIVE           | Entry: 2026-03-15 00:00 @ 88.04 | Exit: 2026-03-15 13:00 @ 87.99 | R: -0.08
+ 3. UP   MSB_SHALLOW          | Entry: 2026-03-15 03:00 @ 88.30 | Exit: 2026-03-15 13:00 @ 88.25 | R: -0.00
+ 4. UP   SR_FLIP              | Entry: 2026-03-15 09:00 @ 88.49 | Exit: 2026-03-17 02:00 @ 95.16 | R: +5.51
+ 5. UP   MSB_DEEP             | Entry: 2026-03-15 15:00 @ 87.98 | Exit: 2026-03-17 03:00 @ 94.88 | R: +4.62
+ 6. UP   MSB_SHALLOW          | Entry: 2026-03-21 13:00 @ 90.19 | Exit: 2026-03-21 23:00 @ 89.53 | R: -1.00
+ 7. DOWN CDC                  | Entry: 2026-03-22 06:00 @ 88.48 | Exit: 2026-03-23 04:00 @ 86.77 | R: +1.96
+ 8. DOWN SR_FLIP              | Entry: 2026-03-22 06:00 @ 88.48 | Exit: 2026-03-23 05:00 @ 86.94 | R: +1.48
+ 9. DOWN MSB_DEEP             | Entry: 2026-03-22 06:00 @ 88.48 | Exit: 2026-03-23 12:00 @ 88.60 | R: -0.07
+10. UP   CDC                  | Entry: 2026-03-23 17:00 @ 90.35 | Exit: 2026-03-23 23:00 @ 91.43 | R: +0.67
+11. UP   MSB_DEEP             | Entry: 2026-03-23 14:00 @ 91.34 | Exit: 2026-03-24 00:00 @ 91.23 | R: -0.02
+12. UP   OPEN_DRIVE           | Entry: 2026-03-24 08:00 @ 91.71 | Exit: 2026-03-24 13:00 @ 90.59 | R: -1.00
+13. UP   CDC                  | Entry: 2026-03-24 10:00 @ 92.12 | Exit: 2026-03-24 13:00 @ 91.03 | R: -0.74
+14. UP   SR_FLIP              | Entry: 2026-03-24 10:00 @ 92.12 | Exit: 2026-03-24 13:00 @ 90.68 | R: -1.00
+15. DOWN OPEN_DRIVE           | Entry: 2026-03-24 14:00 @ 89.86 | Exit: 2026-03-25 00:00 @ 91.07 | R: -1.00
+16. UP   OPEN_DRIVE           | Entry: 2026-03-24 21:00 @ 90.04 | Exit: 2026-03-25 15:00 @ 91.85 | R: +1.51
+17. UP   SR_FLIP              | Entry: 2026-03-24 22:00 @ 90.39 | Exit: 2026-03-25 15:00 @ 91.87 | R: +1.27
+18. UP   MSB_SHALLOW          | Entry: 2026-03-24 22:00 @ 90.39 | Exit: 2026-03-26 09:00 @ 88.52 | R: -1.00
+19. DOWN SR_FLIP              | Entry: 2026-03-26 03:00 @ 90.95 | Exit: 2026-03-28 15:00 @ 83.73 | R: +4.80
+20. DOWN MSB_DEEP             | Entry: 2026-03-26 03:00 @ 90.95 | Exit: 2026-03-30 02:00 @ 83.23 | R: +3.37
+
+4. XRP
+
+--- XRP SUMMARY STATS ---
+Total Trades:      123
+Win Rate:          43.09%
+Average R:         0.53
+Max Drawdown:      29.60%
+Quick full-stops (≤3 bars): 18
+
+Win rate & avg R by setup type:
+  CDC                       WR: 48.0%  AvgR: +0.30  (25 trades)
+  MSB_SHALLOW               WR: 23.1%  AvgR: -0.17  (13 trades)
+  OPEN_DRIVE                WR: 46.9%  AvgR: +1.03  (32 trades)
+  SR_FLIP                   WR: 48.1%  AvgR: +0.66  (27 trades)
+  MSB_DEEP                  WR: 36.4%  AvgR: +0.35  (22 trades)
+  MOMENTUM_DIVERGENCE       WR: 33.3%  AvgR: +0.06  (3 trades)
+  CONSOLIDATION_ENTRY       WR: 100.0%  AvgR: +1.50  (1 trades)
+
+Setups Triggered by Type:
+  CDC: 25
+  MSB_SHALLOW: 13
+  OPEN_DRIVE: 32
+  SR_FLIP: 27
+  MSB_DEEP: 22
+  MOMENTUM_DIVERGENCE: 3
+  CONSOLIDATION_ENTRY: 1
+
+Skipped by Reason:
+  HEAT_CAP: 244
+  MD_NO_CLUSTER_PEER: 33
+
+Full journal written to trade_journal_XRP.csv
+
+--- SAMPLE OF CLOSED TRADES (up to 20) ---
+ 1. UP   CDC                  | Entry: 2026-03-15 03:00 @ 1.42 | Exit: 2026-03-15 08:00 @ 1.41 | R: -0.45
+ 2. UP   MSB_SHALLOW          | Entry: 2026-03-15 03:00 @ 1.42 | Exit: 2026-03-15 15:00 @ 1.42 | R: -0.01
+ 3. UP   OPEN_DRIVE           | Entry: 2026-03-15 03:00 @ 1.42 | Exit: 2026-03-16 02:00 @ 1.45 | R: +3.26
+ 4. UP   SR_FLIP              | Entry: 2026-03-15 18:00 @ 1.42 | Exit: 2026-03-17 03:00 @ 1.57 | R: +6.88
+ 5. UP   MSB_DEEP             | Entry: 2026-03-16 04:00 @ 1.47 | Exit: 2026-03-17 04:00 @ 1.54 | R: +1.31
+ 6. UP   MSB_SHALLOW          | Entry: 2026-03-16 10:00 @ 1.47 | Exit: 2026-03-18 14:00 @ 1.47 | R: -0.03
+ 7. DOWN OPEN_DRIVE           | Entry: 2026-03-17 04:00 @ 1.54 | Exit: 2026-03-19 03:00 @ 1.47 | R: +2.65
+ 8. DOWN MOMENTUM_DIVERGENCE  | Entry: 2026-03-17 05:00 @ 1.53 | Exit: 2026-03-19 03:00 @ 1.47 | R: +2.17
+ 9. UP   SR_FLIP              | Entry: 2026-03-19 07:00 @ 1.47 | Exit: 2026-03-19 12:00 @ 1.45 | R: -1.00
+10. UP   MSB_DEEP             | Entry: 2026-03-19 10:00 @ 1.47 | Exit: 2026-03-19 12:00 @ 1.45 | R: -1.00
+11. DOWN CDC                  | Entry: 2026-03-22 02:00 @ 1.41 | Exit: 2026-03-22 07:00 @ 1.40 | R: -0.02
+12. DOWN OPEN_DRIVE           | Entry: 2026-03-22 00:00 @ 1.41 | Exit: 2026-03-23 05:00 @ 1.39 | R: +1.50
+13. DOWN CONSOLIDATION_ENTRY  | Entry: 2026-03-22 00:00 @ 1.41 | Exit: 2026-03-23 05:00 @ 1.39 | R: +1.50
+14. DOWN OPEN_DRIVE           | Entry: 2026-03-23 07:00 @ 1.37 | Exit: 2026-03-23 11:00 @ 1.39 | R: -1.00
+15. DOWN CDC                  | Entry: 2026-03-23 09:00 @ 1.37 | Exit: 2026-03-23 11:00 @ 1.38 | R: -1.00
+16. DOWN MSB_DEEP             | Entry: 2026-03-23 09:00 @ 1.37 | Exit: 2026-03-23 11:00 @ 1.39 | R: -1.00
+17. DOWN CDC                  | Entry: 2026-03-24 11:00 @ 1.42 | Exit: 2026-03-24 20:00 @ 1.40 | R: +1.12
+18. DOWN SR_FLIP              | Entry: 2026-03-24 13:00 @ 1.42 | Exit: 2026-03-24 23:00 @ 1.42 | R: +0.03
+19. DOWN MSB_DEEP             | Entry: 2026-03-24 11:00 @ 1.42 | Exit: 2026-03-25 00:00 @ 1.42 | R: +0.04
+20. DOWN SR_FLIP              | Entry: 2026-03-25 03:00 @ 1.41 | Exit: 2026-03-25 11:00 @ 1.42 | R: -1.00
+
+5. BNB
+
+--- BNB SUMMARY STATS ---
+Total Trades:      139
+Win Rate:          41.01%
+Average R:         0.47
+Max Drawdown:      34.19%
+Quick full-stops (≤3 bars): 17
+
+Win rate & avg R by setup type:
+  CDC                       WR: 74.1%  AvgR: +0.64  (27 trades)
+  MSB_DEEP                  WR: 22.2%  AvgR: +0.27  (27 trades)
+  SR_FLIP                   WR: 38.9%  AvgR: +0.68  (36 trades)
+  OPEN_DRIVE                WR: 34.2%  AvgR: +0.46  (38 trades)
+  MSB_SHALLOW               WR: 40.0%  AvgR: +0.00  (10 trades)
+  MOMENTUM_DIVERGENCE       WR: 0.0%  AvgR: -1.00  (1 trades)
+
+Setups Triggered by Type:
+  CDC: 27
+  MSB_DEEP: 27
+  SR_FLIP: 36
+  OPEN_DRIVE: 38
+  MSB_SHALLOW: 10
+  MOMENTUM_DIVERGENCE: 1
+
+Skipped by Reason:
+  HEAT_CAP: 52
+  MD_NO_CLUSTER_PEER: 36
+
+Full journal written to trade_journal_BNB.csv
+
+--- SAMPLE OF CLOSED TRADES (up to 20) ---
+ 1. UP   CDC                  | Entry: 2026-03-15 03:00 @ 659.42 | Exit: 2026-03-15 11:00 @ 661.64 | R: +0.68
+ 2. UP   MSB_DEEP             | Entry: 2026-03-15 13:00 @ 661.89 | Exit: 2026-03-16 00:00 @ 672.09 | R: +2.31
+ 3. UP   CDC                  | Entry: 2026-03-16 02:00 @ 675.96 | Exit: 2026-03-16 07:00 @ 678.13 | R: +0.39
+ 4. UP   SR_FLIP              | Entry: 2026-03-16 11:00 @ 679.08 | Exit: 2026-03-16 15:00 @ 673.03 | R: -1.00
+ 5. UP   MSB_DEEP             | Entry: 2026-03-16 17:00 @ 675.31 | Exit: 2026-03-17 04:00 @ 674.89 | R: -0.06
+ 6. UP   MSB_DEEP             | Entry: 2026-03-20 11:00 @ 643.22 | Exit: 2026-03-20 22:00 @ 643.70 | R: +0.05
+ 7. DOWN MSB_DEEP             | Entry: 2026-03-21 04:00 @ 642.32 | Exit: 2026-03-21 15:00 @ 642.56 | R: -0.06
+ 8. UP   SR_FLIP              | Entry: 2026-03-15 00:00 @ 657.70 | Exit: 2026-03-22 00:00 @ 629.18 | R: -1.00
+ 9. DOWN OPEN_DRIVE           | Entry: 2026-03-22 00:00 @ 630.70 | Exit: 2026-03-22 03:00 @ 634.71 | R: -1.00
+10. DOWN CDC                  | Entry: 2026-03-22 06:00 @ 633.56 | Exit: 2026-03-23 04:00 @ 628.76 | R: +1.20
+11. DOWN MSB_DEEP             | Entry: 2026-03-22 06:00 @ 633.56 | Exit: 2026-03-23 11:00 @ 633.94 | R: -0.03
+12. UP   CDC                  | Entry: 2026-03-23 18:00 @ 637.98 | Exit: 2026-03-23 23:00 @ 639.11 | R: +0.16
+13. UP   SR_FLIP              | Entry: 2026-03-24 00:00 @ 639.12 | Exit: 2026-03-24 04:00 @ 631.25 | R: -1.00
+14. UP   MSB_DEEP             | Entry: 2026-03-23 14:00 @ 647.82 | Exit: 2026-03-25 09:00 @ 649.28 | R: +0.06
+15. UP   MSB_SHALLOW          | Entry: 2026-03-15 00:00 @ 657.70 | Exit: 2026-03-26 00:00 @ 655.54 | R: -0.06
+16. DOWN OPEN_DRIVE           | Entry: 2026-03-26 06:00 @ 635.19 | Exit: 2026-03-26 21:00 @ 629.95 | R: +1.23
+17. DOWN CDC                  | Entry: 2026-03-26 09:00 @ 633.55 | Exit: 2026-03-26 21:00 @ 630.78 | R: +0.64
+18. DOWN CDC                  | Entry: 2026-03-26 23:00 @ 629.73 | Exit: 2026-03-27 04:00 @ 627.36 | R: +0.09
+19. DOWN SR_FLIP              | Entry: 2026-03-27 03:00 @ 630.45 | Exit: 2026-03-27 23:00 @ 611.25 | R: +5.07
+20. DOWN OPEN_DRIVE           | Entry: 2026-03-27 09:00 @ 620.59 | Exit: 2026-03-27 23:00 @ 611.77 | R: +2.05

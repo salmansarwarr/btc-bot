@@ -1,0 +1,201 @@
+/home/salman/Documents/GitHub/BOT/
+├── consolidated_build_spec.md
+├── market_context_chart.html
+├── pyproject.toml
+├── run_backtest.py
+├── trade_journal.csv
+├── tuning_changelog.md
+├── visualize_context.py
+├── __pycache__/
+│   └── run_backtest.cpython-310.pyc
+├── .pytest_cache/
+│   ├── .gitignore
+│   ├── CACHEDIR.TAG
+│   ├── README.md
+│   └── v/
+│       ├── cache/
+│       │   ├── lastfailed
+│       │   └── nodeids
+├── .venv/
+│   ├── pyvenv.cfg
+│   ├── bin/
+│   ├── include/
+│   └── lib/
+│       └── python3.10/
+│           └── site-packages/
+├── bot/
+│   ├── __init__.py
+│   ├── config.py
+│   ├── structs.py
+│   ├── __pycache__/
+│   │   ├── __init__.cpython-310.pyc
+│   │   ├── config.cpython-310.pyc
+│   │   └── structs.cpython-310.pyc
+│   ├── backtesting/
+│   │   ├── __init__.py
+│   │   ├── engine.py
+│   │   └── __pycache__/
+│   │       ├── __init__.cpython-310.pyc
+│   │       └── engine.cpython-310.pyc
+│   ├── data_ingestion/
+│   │   ├── __init__.py
+│   │   ├── feed_manager.py
+│   │   ├── market_basket.py
+│   │   ├── ohlcv_buffer.py
+│   │   └── __pycache__/
+│   │       ├── __init__.cpython-310.pyc
+│   │       ├── feed_manager.cpython-310.pyc
+│   │       ├── market_basket.cpython-310.pyc
+│   │       └── ohlcv_buffer.cpython-310.pyc
+│   ├── entry_risk/
+│   │   ├── __init__.py
+│   │   ├── conviction.py
+│   │   ├── entry_gate.py
+│   │   ├── helpers.py
+│   │   ├── sizer.py
+│   │   ├── stop_calculator.py
+│   │   └── __pycache__/
+│   │       ├── __init__.cpython-310.pyc
+│   │       ├── conviction.cpython-310.pyc
+│   │       ├── entry_gate.cpython-310.pyc
+│   │       ├── sizer.cpython-310.pyc
+│   │       └── stop_calculator.cpython-310.pyc
+│   ├── indicators/
+│   │   ├── __init__.py
+│   │   ├── core.py
+│   │   ├── registry.py
+│   │   └── __pycache__/
+│   │       ├── __init__.cpython-310.pyc
+│   │       ├── core.cpython-310.pyc
+│   │       └── registry.cpython-310.pyc
+│   ├── journaling/
+│   │   ├── __init__.py
+│   │   ├── writer.py
+│   │   └── __pycache__/
+│   │       ├── __init__.cpython-310.pyc
+│   │       └── writer.cpython-310.pyc
+│   ├── market_context/
+│   │   ├── __init__.py
+│   │   ├── htf_bias.py
+│   │   ├── pivot_registry.py
+│   │   └── __pycache__/
+│   │       ├── __init__.cpython-310.pyc
+│   │       ├── htf_bias.cpython-310.pyc
+│   │       └── pivot_registry.cpython-310.pyc
+│   ├── portfolio/
+│   │   ├── __init__.py
+│   │   ├── ath_realization.py
+│   │   ├── capitulation.py
+│   │   ├── correlation.py
+│   │   ├── drawdown.py
+│   │   ├── heat.py
+│   │   └── __pycache__/
+│   │       ├── __init__.cpython-310.pyc
+│   │       ├── ath_realization.cpython-310.pyc
+│   │       ├── capitulation.cpython-310.pyc
+│   │       ├── correlation.cpython-310.pyc
+│   │       ├── drawdown.cpython-310.pyc
+│   │       └── heat.cpython-310.pyc
+│   ├── setup_detection/
+│   │   ├── __init__.py
+│   │   ├── cdc.py
+│   │   ├── clean_break.py
+│   │   ├── consolidation.py
+│   │   ├── liquidation_flush.py
+│   │   ├── momentum_divergence.py
+│   │   ├── msb_pullback.py
+│   │   ├── open_drive.py
+│   │   ├── runner.py
+│   │   ├── sfp.py
+│   │   ├── sr_flip.py
+│   │   └── __pycache__/
+│   │       ├── __init__.cpython-310.pyc
+│   │       ├── cdc.cpython-310.pyc
+│   │       ├── clean_break.cpython-310.pyc
+│   │       ├── consolidation.cpython-310.pyc
+│   │       ├── liquidation_flush.cpython-310.pyc
+│   │       ├── momentum_divergence.cpython-310.pyc
+│   │       ├── msb_pullback.cpython-310.pyc
+│   │       ├── open_drive.cpython-310.pyc
+│   │       ├── runner.cpython-310.pyc
+│   │       ├── sfp.cpython-310.pyc
+│   │       └── sr_flip.cpython-310.pyc
+│   └── trade_management/
+│       ├── __init__.py
+│       ├── actions.py
+│       ├── dynamic_r.py
+│       ├── expiry.py
+│       ├── fta_handler.py
+│       ├── lifecycle.py
+│       ├── stalling.py
+│       └── __pycache__/
+├── scratch/
+│   ├── btc_entry_gate_validation.csv
+│   ├── btc_setups.csv
+│   ├── run_2_weeks_btc.py
+│   ├── run_entry_gate_validation.py
+│   └── run_lifecycle_validation.py
+└── tests/
+    ├── __init__.py
+    ├── test_backtest_integration.py
+    ├── test_conviction.py
+    ├── test_data_ingestion.py
+    ├── test_dynamic_r.py
+    ├── test_entry_gate.py
+    ├── test_expiry.py
+    ├── test_fta_handler.py
+    ├── test_indicators.py
+    ├── test_journal_integration.py
+    ├── test_lifecycle.py
+    ├── test_market_context.py
+    ├── test_portfolio_ath.py
+    ├── test_portfolio_capitulation.py
+    ├── test_portfolio_drawdown.py
+    ├── test_portfolio_heat.py
+    ├── test_portfolio_integration.py
+    ├── test_setup_detection.py
+    ├── test_sizer.py
+    ├── test_stalling.py
+    ├── test_stop_calculator.py
+    └── __pycache__/
+        ├── __init__.cpython-310.pyc
+        ├── test_backtest_integration.cpython-310-pytest-9.0.3.pyc
+        ├── test_backtest_integration.cpython-310.pyc
+        ├── test_conviction.cpython-310-pytest-9.0.3.pyc
+        ├── test_conviction.cpython-310.pyc
+        ├── test_data_ingestion.cpython-310-pytest-9.0.3.pyc
+        ├── test_data_ingestion.cpython-310.pyc
+        ├── test_dynamic_r.cpython-310-pytest-9.0.3.pyc
+        ├── test_dynamic_r.cpython-310.pyc
+        ├── test_entry_gate.cpython-310-pytest-9.0.3.pyc
+        ├── test_entry_gate.cpython-310.pyc
+        ├── test_expiry.cpython-310-pytest-9.0.3.pyc
+        ├── test_expiry.cpython-310.pyc
+        ├── test_fta_handler.cpython-310-pytest-9.0.3.pyc
+        ├── test_fta_handler.cpython-310.pyc
+        ├── test_indicators.cpython-310-pytest-9.0.3.pyc
+        ├── test_indicators.cpython-310.pyc
+        ├── test_journal_integration.cpython-310-pytest-9.0.3.pyc
+        ├── test_journal_integration.cpython-310.pyc
+        ├── test_lifecycle.cpython-310-pytest-9.0.3.pyc
+        ├── test_lifecycle.cpython-310.pyc
+        ├── test_market_context.cpython-310-pytest-9.0.3.pyc
+        ├── test_market_context.cpython-310.pyc
+        ├── test_portfolio_ath.cpython-310-pytest-9.0.3.pyc
+        ├── test_portfolio_ath.cpython-310.pyc
+        ├── test_portfolio_capitulation.cpython-310-pytest-9.0.3.pyc
+        ├── test_portfolio_capitulation.cpython-310.pyc
+        ├── test_portfolio_drawdown.cpython-310-pytest-9.0.3.pyc
+        ├── test_portfolio_drawdown.cpython-310.pyc
+        ├── test_portfolio_heat.cpython-310-pytest-9.0.3.pyc
+        ├── test_portfolio_heat.cpython-310.pyc
+        ├── test_portfolio_integration.cpython-310-pytest-9.0.3.pyc
+        ├── test_portfolio_integration.cpython-310.pyc
+        ├── test_setup_detection.cpython-310-pytest-9.0.3.pyc
+        ├── test_setup_detection.cpython-310.pyc
+        ├── test_sizer.cpython-310-pytest-9.0.3.pyc
+        ├── test_sizer.cpython-310.pyc
+        ├── test_stalling.cpython-310-pytest-9.0.3.pyc
+        ├── test_stalling.cpython-310.pyc
+        ├── test_stop_calculator.cpython-310-pytest-9.0.3.pyc
+        └── test_stop_calculator.cpython-310.pyc

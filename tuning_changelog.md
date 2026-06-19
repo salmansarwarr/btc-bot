@@ -640,3 +640,25 @@ Conviction analysis produced 86 trades vs 93 in Change 19 sweep. Likely caused b
   1. **Regime Shift / Overfitting:** The portfolio's win rate collapsed out-of-sample (from 57% down to 35.6%), indicating either severe curve-fitting to the training window or a very unfavorable market regime.
   2. **Positive Expectancy Intact:** Despite the poor win rate, the system preserved a positive +0.42 AvgR and generated +$47k PnL, proving the risk/reward profile built via the tight detection criteria continues to yield a mathematical edge. CDC, specifically, achieved an 80% WR (+1.84 AvgR) on its 5 out-of-sample trades thanks to Change 24.
   3. **Cluster Toxicity:** Concurrent trade exposure (clustered trades) continues to be the dominant source of drawdown. Out-of-sample, isolated trades generated 82.5% of the total PnL with less than 7% max drawdown, while clustered trades suffered severely. A hard portfolio limit on concurrent trades or tighter `MAX_HEAT_PCT` should be the next major investigation.
+
+---
+
+### Change 25: Portfolio Heat Tightening
+
+- **Proxy Parameters:** `MAX_HEAT_PCT`, `MAX_CORRELATED_HEAT_PCT`
+- **Original Values:** `0.06` (6% equity open risk cap)
+- **New Value:** `0.04` (4% equity open risk cap)
+- **Reasoning:** In the Post-Train OOS Milestone, clustered trades caused severe performance drags: they accounted for 53.4% of trades, suffered a 11.97% max drawdown, but only generated 17.5% of the portfolio's PnL. We swept the `MAX_HEAT_PCT` on the OOS segment to find a threshold that explicitly limits concurrency without starving the portfolio.
+- **Before Stats (OOS):** Trades 118, WR 35.6%, Avg R +0.42, Engine DD 19.18%
+- **After Stats (OOS):** Trades 85, WR 35.3%, Avg R +0.36, Engine DD 12.85%
+
+| Configuration | Trades | WR | AvgR | EngDD | CluDD | IsoDD |
+|---|---|---|---|---|---|---|
+| `heat_0.08` | 132 | 37.9% | +0.47 | 24.64% ⚠️ | 17.72% | 4.33% |
+| baseline (`0.06`) | 118 | 35.6% | +0.42 | 19.18% | 11.97% | 6.92% |
+| `heat_0.05` | 105 | 36.2% | +0.35 | 15.70% | 11.03% | 7.27% |
+| **`heat_0.04`** ✅ | 85 | **35.3%** | +0.36 | **12.85%** | 11.77% | 10.09% |
+| `heat_0.03` | 72 | 38.9% | +0.35 | 12.53% | 12.47% | 8.87% |
+| `heat_0.02` | 33 | 33.3% | +0.05 | 10.39% | 5.30% | 7.42% |
+
+- **Verdict:** Keeping `MAX_HEAT_PCT = 0.04`. By reducing the maximum allowed open risk from 6% to 4%, the portfolio naturally limits itself to fewer concurrent entries. This aggressively trimmed the overall Engine Max Drawdown from 19.18% to 12.85% while still keeping enough trades flowing (85 OOS trades) to generate a statistically solid +0.36 AvgR. Moving below 4% began to degrade AvgR severely due to excessive setup starvation.

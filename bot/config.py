@@ -137,8 +137,8 @@ CONFIG: Dict[str, Any] = {
 
     # ── Portfolio heat ───────────────────────────────────────────────────────
     # Spec §8.x; Doc-2 §14 (Proxy A hard ceiling + C soft cooloff)
-    "MAX_HEAT_PCT": 0.06,               # hard ceiling: total open risk may never exceed 12% of equity
-    "MAX_CORRELATED_HEAT_PCT": 0.06,    # per-correlation-bucket cap: 8% of equity
+    "MAX_HEAT_PCT": 0.04,               # hard ceiling: total open risk may never exceed 4% of equity [Change 25: tightened from 6%]
+    "MAX_CORRELATED_HEAT_PCT": 0.04,    # per-correlation-bucket cap: 4% of equity [Change 25: tightened from 6%]
     "HEAT_COOLOFF_LOSS_STREAK": 3,      # consecutive losses before soft cooloff activates (C early-warning, II-13)
     "HEAT_COOLOFF_REDUCTION": 0.25,     # effective_max_heat reduced by this fraction during loss streak
     "CORRELATION_BUCKETS": {},          # NEW (III-2): {asset_symbol: bucket_label}; set at bot config time

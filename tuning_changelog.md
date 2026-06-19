@@ -549,7 +549,7 @@ Conviction analysis produced 86 trades vs 93 in Change 19 sweep. Likely caused b
 - [x] ~~OPEN_DRIVE detection tightening.~~ ✅ **Change 21 — `DRIVE_ATR_MULT=1.2`, `DRIVE_BODY_RANGE_RATIO_MIN=0.65`**
 - [x] ~~SR_FLIP anchor matrix check.~~ ✅ **Milestone OOS check completed.**
 - [x] ~~SR_FLIP detection tightening.~~ ✅ **Change 22 — `FLIP_BODY_RATIO_MIN=0.50`.**
-- **[Next]** MSB_DEEP target sweep — investigate `DEEP_FIB_MIN` / `DEEP_FIB_MAX` or target multiples to improve AvgR (currently +0.67 on high WR).
+- [x] ~~MSB_DEEP target sweep.~~ ✅ **Change 23 — `DEEP_FIB_MAX=0.80`.**
 - **[Defer]** CDC detection tightening — low trade count (16) makes statistical inference weak; defer until more data.
 
 ---
@@ -587,3 +587,23 @@ Conviction analysis produced 86 trades vs 93 in Change 19 sweep. Likely caused b
 | **`body_0.50`** ✅ | 109 | **54.1%** | +0.76 | **13.73%** | 22 | **59.1%** | +0.50 |
 
 - **Verdict:** Keeping `FLIP_BODY_RATIO_MIN=0.50`. Tightening the ATR multiplier on the confirmation candle caused a massive concurrent exposure Engine DD spike (24.31%)—the same failure mode seen in previous gating attempts. However, enforcing that the confirmation candle has directional conviction (body > 50% of range) improved SR_FLIP's WR from 45.8% to 59.1% and dropped Engine DD from 17.20% to 13.73% while actually *increasing* total portfolio trades (92 → 109) and overall portfolio WR (51.1% → 54.1%).
+
+---
+
+### Change 23: MSB_DEEP Fib Retracement Tightening
+
+- **Proxy Parameters:** `DEEP_FIB_MIN`, `DEEP_FIB_MAX`
+- **Original Values:** `DEEP_FIB_MIN=0.55`, `DEEP_FIB_MAX=0.85`
+- **New Value:** `DEEP_FIB_MIN=0.55`, `DEEP_FIB_MAX=0.80`
+- **Reasoning:** MSB_DEEP showed high win rate but mediocre average R (+0.67 AvgR vs +1.01 for OPEN_DRIVE). We swept various Fibonacci retracement bands to see if excluding the deepest retracements (which signify weaker momentum) or tightening to a "golden zone" would improve the R multiple without sacrificing win rate or causing an Engine DD spike.
+- **Before Stats:** Trades 123, WR 48.78%, Avg R +0.61, Engine DD 13.62% (MSB_DEEP WR: 54.2%, AvgR +0.66)
+- **After Stats:** Trades 107, WR 54.21%, Avg R +0.76, Engine DD 13.73% (MSB_DEEP WR: 61.9%, AvgR +0.93)
+
+| Configuration | Trades | WR | AvgR | EngDD | DP Trades | DP WR | DP AvgR |
+|---|---|---|---|---|---|---|---|
+| baseline (0.55-0.85) | 123 | 48.8% | +0.61 | 13.62% | 24 | 54.2% | +0.66 |
+| `dp_0.618-0.786_golden` | 109 | 47.7% | +0.60 | 19.38% ⚠️ | 11 | 54.5% | +0.27 |
+| `dp_0.50-0.85_looser` | 95 | 54.7% | +0.78 | 20.66% ⚠️ | 22 | 59.1% | +0.87 |
+| **`dp_0.55-0.80`** ✅ | 107 | **54.2%** | +0.76 | **13.73%** | 21 | **61.9%** | +0.93 |
+
+- **Verdict:** Keeping `DEEP_FIB_MAX=0.80`. Trimming the maximum allowed retracement from 85% to 80% successfully filtered out the weakest momentum setups. The 3 excluded MSB_DEEP trades were clearly dragging performance: by dropping them, MSB_DEEP AvgR jumped from +0.66 to +0.93 and its WR increased to 61.9%. Crucially, this setup tightening did NOT cause the concurrent exposure Engine DD spike (+0.11pp is noise), unlike attempts to shift the band to the "golden zone" (EngDD 19.38%). Portfolio-wide WR also improved substantially (48.8% → 54.2%).

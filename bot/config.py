@@ -78,7 +78,7 @@ CONFIG: Dict[str, Any] = {
     "SHALLOW_FIB_MAX": 0.382,           # maximum Fibonacci retracement for shallow-pullback classification
     "SHALLOW_ATR_CAP_MULT": 2.0,        # ATR sanity cap: retracement > this × ATR(14) → NOT shallow (II-5 wiring)  [Change 19: tightened from 3.0]
     "DEEP_FIB_MIN": 0.55,               # minimum retracement ratio for deep-pullback (tolerance band)
-    "DEEP_FIB_MAX": 0.85,               # maximum retracement ratio for deep-pullback (tolerance band)
+    "DEEP_FIB_MAX": 0.80,               # maximum retracement ratio for deep-pullback (tolerance band) [Change 23: tightened from 0.85]
     "DEEP_PULLBACK_CONFLUENCE_BONUS": 0.5,      # NEW (II-6): conviction bonus when deep pullback also re-enters consolidation zone
 
     # ── Candle Open Drive / SFP ──────────────────────────────────────────────

@@ -662,3 +662,53 @@ Conviction analysis produced 86 trades vs 93 in Change 19 sweep. Likely caused b
 | `heat_0.02` | 33 | 33.3% | +0.05 | 10.39% | 5.30% | 7.42% |
 
 - **Verdict:** Keeping `MAX_HEAT_PCT = 0.04`. By reducing the maximum allowed open risk from 6% to 4%, the portfolio naturally limits itself to fewer concurrent entries. This aggressively trimmed the overall Engine Max Drawdown from 19.18% to 12.85% while still keeping enough trades flowing (85 OOS trades) to generate a statistically solid +0.36 AvgR. Moving below 4% began to degrade AvgR severely due to excessive setup starvation.
+
+---
+
+### Milestone: Final Portfolio Validation (Untouched HOLDOUT)
+
+- **Type:** Pre-paper final validation on completely unseen dataset (`2025-09-15` -> `2025-12-14`)
+- **Protocol:** `python3 scratch/walk_forward.py --split holdout --final-validation --milestone "pre-paper"`
+- **Reasoning:** After completing all setup tightening sweeps (TRAIN) and fixing the portfolio heat limits (TEST/OOS), the final, untainted validation must be run against the `HOLDOUT` dataset to confirm the system's robustness and ensure no accidental data snooping.
+- **FINAL HOLDOUT Stats:**
+  - Total Trades: 85
+  - Win Rate: 48.24%
+  - Average R: +0.3539
+  - Max Drawdown: 9.16%
+  - Total PnL: +$41,124
+- **Per-Setup Breakdown:**
+  - `SR_FLIP`: 15 trades, 60.0% WR, +0.808 AvgR
+  - `MSB_DEEP`: 19 trades, 57.9% WR, +0.382 AvgR
+  - `MSB_SHALLOW`: 7 trades, 42.9% WR, +0.420 AvgR
+  - `OPEN_DRIVE`: 31 trades, 38.7% WR, +0.299 AvgR
+  - `CDC`: 12 trades, 50.0% WR, -0.043 AvgR
+- **Cluster Drag Analysis:**
+  - Clustered Trades: 31 (36.5%), PnL share: 50.9%, Max DD 9.63%
+  - Isolated Trades: 54 (63.5%), PnL share: 49.1%, Max DD 10.00%
+- **Takeaways:**
+  1. **Drawdown Conquered:** The tightening of `MAX_HEAT_PCT` to 4% was a massive success. The engine max drawdown collapsed to just **9.16%** on the holdout set, completely neutralizing the cluster toxicity that plagued previous runs. Clustered and isolated trades now share equal DD and PnL profiles.
+  2. **Robust Generalization:** The win rate recovered strongly to 48.24% (up from 35.6% on the TEST set). The portfolio generated +$41,124 in PnL with a stable +0.35 AvgR over the 90-day unseen window.
+  3. **Setup Stars:** `SR_FLIP` and `MSB_DEEP` proved to be incredibly robust anchors for the portfolio, maintaining ~60% win rates out-of-sample.
+  4. **Status:** The tuning process is officially complete. The system demonstrates a high-quality positive expectancy with tightly controlled risk and is ready for live/paper deployment.
+
+---
+
+## Phase 2: Live / Paper Trading Guidelines
+
+Before initiating the live paper-trading deployment, the following operational mandates and guardrails are in effect to protect the portfolio and ensure statistical integrity:
+
+1. **Pause Threshold (System Circuit Breaker):**
+   - If the **30-day rolling Average R drops below `+0.10`**, OR
+   - If the **Portfolio Max Drawdown exceeds `15.0%`**.
+   - **Action:** Immediately halt the trading engine and pause deployments. Investigate the failure mode against the recent tuning baselines before re-enabling.
+
+2. **CDC Watchlist (Probation):**
+   - CDC required severe tightening (Change 24) to stop bleeding capital.
+   - **Action:** If the `CDC` setup reaches **25 live trades with a negative Average R**, explicitly flag it for removal or the next major tuning cycle. Do not allow it to accumulate further untethered losses.
+
+3. **Minimum Evaluation Horizon:**
+   - **Action:** Do NOT draw any system-level conclusions (positive or negative) before recording at least **60 live trades**. The variance of the R-multiples requires a statistically significant sample size to judge regime shift vs. standard strategy drawdown.
+
+4. **Per-Setup Live Tracking (Cluster vs. Isolated Analysis):**
+   - **Action:** Log and analyze the **Clustered vs. Isolated PnL split on a weekly basis**.
+   - **Reasoning:** The massive inversion of cluster toxicity between the OOS test (where clustered trades were disastrous) and the Holdout validation (where clustered trades generated equal PnL and DD to isolated trades) is the biggest remaining unknown. Live weekly data will act as an early-warning radar to tell us exactly which volatility/regime the live market is currently operating in faster than any lagging indicator.

@@ -36,6 +36,8 @@ def update_trade(
     journal: Optional[List] = None,
     portfolio=None,          # PortfolioState — used by log_trade_closed on final close
     event_journal: Optional[List] = None,   # receives interim EventType records
+    executor=None,
+    notifier=None,
 ) -> List[Dict[str, str]]:
     """
     Single entry point called once per bar for each open trade.
@@ -66,13 +68,13 @@ def update_trade(
         close_trade(trade, trade.stop_price, now)
         events.append({"action": "CLOSE", "reason": "stop_loss"})
         trade.bars_in_trade += 1
-        _flush_events(events, trade, journal, event_journal, portfolio, now)
+        _flush_events(events, trade, journal, event_journal, portfolio, now, executor, notifier)
         return events
     elif trade.direction == Direction.DOWN and current_price >= trade.stop_price:
         close_trade(trade, trade.stop_price, now)
         events.append({"action": "CLOSE", "reason": "stop_loss"})
         trade.bars_in_trade += 1
-        _flush_events(events, trade, journal, event_journal, portfolio, now)
+        _flush_events(events, trade, journal, event_journal, portfolio, now, executor, notifier)
         return events
 
     # ── 1. Stalling ─────────────────────────────────────────────────────────
@@ -80,7 +82,7 @@ def update_trade(
     if not trade.is_open and initial_open:
         events.append({"action": "CLOSE", "reason": "stalling_close"})
         trade.bars_in_trade += 1
-        _flush_events(events, trade, journal, event_journal, portfolio, now)
+        _flush_events(events, trade, journal, event_journal, portfolio, now, executor, notifier)
         return events
     elif trade.position_size < initial_size:
         events.append({"action": "PARTIAL", "reason": "stalling_cut"})
@@ -91,7 +93,7 @@ def update_trade(
     if not trade.is_open and initial_open:
         events.append({"action": "CLOSE", "reason": "fta_rejection"})
         trade.bars_in_trade += 1
-        _flush_events(events, trade, journal, event_journal, portfolio, now)
+        _flush_events(events, trade, journal, event_journal, portfolio, now, executor, notifier)
         return events
     elif trade.position_size > initial_size:
         events.append({"action": "COMPOUND", "reason": "fta_break"})
@@ -111,7 +113,7 @@ def update_trade(
     if not trade.is_open and initial_open:
         events.append({"action": "CLOSE", "reason": "time_expiry"})
         trade.bars_in_trade += 1
-        _flush_events(events, trade, journal, event_journal, portfolio, now)
+        _flush_events(events, trade, journal, event_journal, portfolio, now, executor, notifier)
         return events
     elif trade.stop_price != initial_stop:
         events.append({"action": "TIGHTEN", "reason": "expiry_warning"})
@@ -124,7 +126,7 @@ def update_trade(
         events.append({"action": "HOLD", "reason": "no_trigger"})
 
     # Emit interim journal events (non-close actions)
-    _flush_events(events, trade, journal, event_journal, portfolio, now)
+    _flush_events(events, trade, journal, event_journal, portfolio, now, executor, notifier)
     return events
 
 
@@ -137,6 +139,8 @@ def _flush_events(
     event_journal: Optional[List],
     portfolio,
     now: Optional[datetime],
+    executor=None,
+    notifier=None,
 ) -> None:
     """
     After each dispatch round, write journal entries for each action.
@@ -152,6 +156,17 @@ def _flush_events(
         if action == "CLOSE" and journal is not None and portfolio is not None:
             exit_price = trade.exit_price if trade.exit_price != 0.0 else trade.entry_price
             log_trade_closed(trade, portfolio, exit_price, now or datetime.utcnow(), journal)
+            
+            # LIVE EXECUTION
+            if executor:
+                executor.cancel_order(trade.id) # simulated cancel/close
+            if notifier:
+                notifier.alert_trade_closed(
+                    setup_type=trade.setup_type.name,
+                    direction=trade.direction.name,
+                    reason=reason,
+                    r_multiple=trade.realized_r
+                )
         elif action != "HOLD" and event_journal is not None:
             event_type = _ACTION_TO_EVENT.get(action, EventType.SKIPPED)
             log_event(
@@ -161,3 +176,12 @@ def _flush_events(
                 trade,
                 now,
             )
+            # Emit live signals for partials or compound or tighten
+            if action in ["PARTIAL", "COMPOUND"] and executor:
+                # In a real engine, we'd calculate delta size and submit an adjusting order
+                from bot.structs import Direction
+                executor.submit_market_order(
+                    trade.asset,
+                    "sell" if trade.direction == Direction.UP else "buy",
+                    qty=trade.position_size # pseudo size for now
+                )

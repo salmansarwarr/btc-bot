@@ -69,8 +69,10 @@ class BacktestEngine:
     Orchestrates the backtest pipeline bar-by-bar.
     """
 
-    def __init__(self, initial_equity: float = 100000.0):
+    def __init__(self, initial_equity: float = 100000.0, executor=None, notifier=None):
         self.portfolio = PortfolioState(equity=initial_equity, equity_ath=initial_equity)
+        self.executor = executor
+        self.notifier = notifier
         self.trade_journal: List[TradeJournalEntry] = []
         self.skipped_journal: List[SkippedSetupLogEntry] = []
         self.event_journal: List[Dict] = []
@@ -252,6 +254,28 @@ class BacktestEngine:
                 self._apply_cluster_pnl_scaling(res.trade, self._newly_opened)
                 res.trade.entry_timestamp = now
                 self._newly_opened[res.trade.id] = res.trade
+                
+                # --- LIVE EXECUTION / NOTIFICATION ---
+                if self.executor:
+                    self.executor.submit_market_order(
+                        asset=res.trade.asset,
+                        side="buy" if res.trade.direction == Direction.UP else "sell",
+                        qty=res.trade.position_size
+                    )
+                    self.executor.submit_stop_order(
+                        asset=res.trade.asset,
+                        side="sell" if res.trade.direction == Direction.UP else "buy",
+                        qty=res.trade.position_size,
+                        stop_price=res.trade.stop_price
+                    )
+                if self.notifier:
+                    self.notifier.alert_trade_opened(
+                        setup_type=res.trade.setup_type.name,
+                        direction=res.trade.direction.name,
+                        entry_price=res.trade.entry_price,
+                        stop_price=res.trade.stop_price,
+                        size=res.trade.position_size
+                    )
 
         # Write back candidates belonging to other bars/timeframes so they are
         # retried on their matching bar (Bug 2: still_pending was never stored).
@@ -338,6 +362,7 @@ class BacktestEngine:
                 update_trade(
                     trade, current_price, bar_idx, atr, now,
                     self.trade_journal, self.portfolio, self.event_journal,
+                    executor=self.executor, notifier=self.notifier
                 )
 
                 if not trade.is_open:
@@ -364,9 +389,10 @@ class BacktestEngine:
         check_drawdown_tier(self.portfolio, self.event_journal)
 
         equity_30d_ago  = self.portfolio.equity
-        thirty_days_ago = now.timestamp() - 30 * 86400
+        thirty_days_ago_ms = now - 30 * 86400 * 1000
         for t, eq in reversed(self.equity_history):
-            if t.timestamp() <= thirty_days_ago:
+            t_ms = t.timestamp() * 1000 if isinstance(t, datetime) else t
+            if t_ms <= thirty_days_ago_ms:
                 equity_30d_ago = eq
                 break
         check_ath_realization(self.portfolio, equity_30d_ago, now)
@@ -430,12 +456,13 @@ class BacktestEngine:
             skipped_reasons[s.reason] += 1
 
         # Loss breakdown by time held
-        quick_losses = sum(
-            1 for t in trades
-            if t.realized_r <= -0.95
-            and t.exit_timestamp and t.entry_timestamp
-            and (t.exit_timestamp - t.entry_timestamp).total_seconds() <= 3600 * 3
-        )
+        quick_losses = 0
+        for t in trades:
+            if t.realized_r <= -0.95 and t.exit_timestamp and t.entry_timestamp:
+                entry_ms = t.entry_timestamp.timestamp() * 1000 if hasattr(t.entry_timestamp, "timestamp") else t.entry_timestamp
+                exit_ms = t.exit_timestamp.timestamp() * 1000 if hasattr(t.exit_timestamp, "timestamp") else t.exit_timestamp
+                if (exit_ms - entry_ms) / 1000 <= 3600 * 3:
+                    quick_losses += 1
 
         # Per-setup win rate and avg R
         by_type_wr: Dict[str, Dict] = {}

@@ -39,7 +39,9 @@ def check_ath_realization(portfolio: PortfolioState, equity_30d_ago: float, now:
     if portfolio.last_realization_date is None:
         portfolio.last_realization_date = now
 
-    days_since_last = (now - portfolio.last_realization_date).days
+    now_ms = now.timestamp() * 1000 if isinstance(now, datetime) else now
+    last_ms = portfolio.last_realization_date.timestamp() * 1000 if isinstance(portfolio.last_realization_date, datetime) else portfolio.last_realization_date
+    days_since_last = (now_ms - last_ms) / (86400 * 1000.0)
 
     # 1. Primary Trigger
     if equity_30d_ago > 0:

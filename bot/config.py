@@ -126,6 +126,12 @@ CONFIG: Dict[str, Any] = {
     "CAPITULATION_TRANCHE_DROP_PCT": 0.10,      # NEW (III-3): each additional -10% price drop earns one reserve tranche
     "CAPITULATION_TRANCHE_SIZE": 0.25,          # NEW (III-3): fraction of capitulation reserve deployed per tranche
     "CAPITULATION_DRAWDOWN_LOOKBACK_BARS": 30,  # NEW (III-8): D1 bar window for recent-high in drawdown calculation
+    
+    # ── Live Trading / Execution ─────────────────────────────────────────────
+    "PAPER_TRADING": True,                      # Set to True to simulate orders internally without ccxt calls
+    "EXCHANGE_BASE_URL": "https://api.binance.com/api", # Use testnet.binance.vision/api for testnet
+    "TELEGRAM_BOT_TOKEN": "",                   # Alerting bot token
+    "TELEGRAM_CHAT_ID": "",                     # Alerting chat id
 
     # ── Portfolio ATH realization ────────────────────────────────────────────
     # Spec §8.x; Doc-2 §13 (Proxy A primary + B backstop)
@@ -253,6 +259,11 @@ MEGA_WIPE_PRICE_DRAWDOWN: float             = CONFIG["MEGA_WIPE_PRICE_DRAWDOWN"]
 CAPITULATION_TRANCHE_DROP_PCT: float        = CONFIG["CAPITULATION_TRANCHE_DROP_PCT"]
 CAPITULATION_TRANCHE_SIZE: float            = CONFIG["CAPITULATION_TRANCHE_SIZE"]
 CAPITULATION_DRAWDOWN_LOOKBACK_BARS: int    = CONFIG["CAPITULATION_DRAWDOWN_LOOKBACK_BARS"]
+
+PAPER_TRADING: bool                         = CONFIG["PAPER_TRADING"]
+EXCHANGE_BASE_URL: str                      = CONFIG["EXCHANGE_BASE_URL"]
+TELEGRAM_BOT_TOKEN: str                     = CONFIG["TELEGRAM_BOT_TOKEN"]
+TELEGRAM_CHAT_ID: str                       = CONFIG["TELEGRAM_CHAT_ID"]
 
 ATH_GAIN_PCT_30D: float                     = CONFIG["ATH_GAIN_PCT_30D"]
 ATH_REALIZATION_PCT: float                  = CONFIG["ATH_REALIZATION_PCT"]

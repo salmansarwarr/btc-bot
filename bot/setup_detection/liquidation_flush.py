@@ -30,7 +30,7 @@ def detect_liquidation_flush(
     """
     candidates = []
     
-    if not bars or not feed.liq_hourly or not feed.oi_hourly:
+    if not bars or not feed or not feed.liq_hourly or not feed.oi_hourly:
         return candidates
         
     is_spike = False

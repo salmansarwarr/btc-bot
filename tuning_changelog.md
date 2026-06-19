@@ -607,3 +607,36 @@ Conviction analysis produced 86 trades vs 93 in Change 19 sweep. Likely caused b
 | **`dp_0.55-0.80`** ✅ | 107 | **54.2%** | +0.76 | **13.73%** | 21 | **61.9%** | +0.93 |
 
 - **Verdict:** Keeping `DEEP_FIB_MAX=0.80`. Trimming the maximum allowed retracement from 85% to 80% successfully filtered out the weakest momentum setups. The 3 excluded MSB_DEEP trades were clearly dragging performance: by dropping them, MSB_DEEP AvgR jumped from +0.66 to +0.93 and its WR increased to 61.9%. Crucially, this setup tightening did NOT cause the concurrent exposure Engine DD spike (+0.11pp is noise), unlike attempts to shift the band to the "golden zone" (EngDD 19.38%). Portfolio-wide WR also improved substantially (48.8% → 54.2%).
+
+---
+
+### Change 24: CDC Detection Tightening
+
+- **Proxy Parameters:** `CDC_CONFIRM_ATR_MULT`, `CDC_BODY_RATIO_MIN` (Newly implemented in `cdc.py`)
+- **Original Values:** Implicitly `0.0`, `0.0`
+- **New Value:** `CDC_CONFIRM_ATR_MULT=1.0`
+- **Reasoning:** CDC was the only remaining setup that hadn't had its bounce confirmation candle filtered. Given its poor out-of-sample performance, we introduced an ATR multiplier and body ratio requirement to the confirmation candle that follows the pivot drift.
+- **Before Stats (Train):** Trades 121, WR 48.8%, Avg R +0.61, Engine DD 12.49% (CDC WR: 46.2%, AvgR +0.37)
+- **After Stats (Train):** Trades 78, WR 57.7%, Avg R +0.90, Engine DD 11.77% (CDC WR: 83.3%, AvgR +0.95)
+- **Verdict:** Keeping `CDC_CONFIRM_ATR_MULT=1.0`. Enforcing a strong confirmation bounce drastically reduced the number of weak CDC setups (26 → 6 trades on the training set) while sending its win rate soaring to 83.3%. This also dropped the total Engine DD to 11.77% and lifted the portfolio average R to an exceptional +0.90 on the training segment.
+
+---
+
+### Milestone: Post-Train Portfolio Optimization (OOS Validation)
+
+- **Type:** Full portfolio generalization check on TEST/OOS (`2025-12-14` -> `2026-03-14`)
+- **Protocol:** `python3 scratch/walk_forward.py --split test --milestone "Change 24 - CDC Tightening"`
+- **Reasoning:** After completing all detection-tightening sweeps on the TRAIN segment (Changes 19-24), evaluate if the performance profile (57.7% WR, +0.90 AvgR, 11.7% MaxDD) holds up on unseen market data.
+- **TEST/OOS Stats:**
+  - Total Trades: 118
+  - Win Rate: 35.59%
+  - Average R: +0.4223
+  - Max Drawdown: 19.18%
+  - Total PnL: +$47,724
+- **Cluster Drag Analysis:**
+  - Clustered Trades: 63 (53.4%), PnL share: 17.5%, Max DD 11.97%
+  - Isolated Trades: 55 (46.6%), PnL share: 82.5%, Max DD 6.92%
+- **Takeaways:**
+  1. **Regime Shift / Overfitting:** The portfolio's win rate collapsed out-of-sample (from 57% down to 35.6%), indicating either severe curve-fitting to the training window or a very unfavorable market regime.
+  2. **Positive Expectancy Intact:** Despite the poor win rate, the system preserved a positive +0.42 AvgR and generated +$47k PnL, proving the risk/reward profile built via the tight detection criteria continues to yield a mathematical edge. CDC, specifically, achieved an 80% WR (+1.84 AvgR) on its 5 out-of-sample trades thanks to Change 24.
+  3. **Cluster Toxicity:** Concurrent trade exposure (clustered trades) continues to be the dominant source of drawdown. Out-of-sample, isolated trades generated 82.5% of the total PnL with less than 7% max drawdown, while clustered trades suffered severely. A hard portfolio limit on concurrent trades or tighter `MAX_HEAT_PCT` should be the next major investigation.

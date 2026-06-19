@@ -71,6 +71,8 @@ CONFIG: Dict[str, Any] = {
     # ── CDC no-interaction buffer ────────────────────────────────────────────
     # Spec §2.4; Doc-2 §6 (Proxy A)
     "CDC_NO_INTERACTION_ATR_MULT": 0.05,  # max wick intrusion into level (× ATR) still classified as no-interaction
+    "CDC_CONFIRM_ATR_MULT": 1.0,          # NEW: confirmation candle body must be >= this × ATR [Change 24: tightened from 0.0]
+    "CDC_BODY_RATIO_MIN": 0.0,            # NEW: confirmation candle body/range ratio
 
     # ── Pullback depth ───────────────────────────────────────────────────────
     # Spec §2.x; Doc-2 §7 (shallow) and §8 (deep)
@@ -207,6 +209,8 @@ FLIP_BODY_RATIO_MIN: float                  = CONFIG["FLIP_BODY_RATIO_MIN"]
 MIN_STOP_ATR_MULT: float                    = CONFIG["MIN_STOP_ATR_MULT"]
 
 CDC_NO_INTERACTION_ATR_MULT: float          = CONFIG["CDC_NO_INTERACTION_ATR_MULT"]
+CDC_CONFIRM_ATR_MULT: float                 = CONFIG["CDC_CONFIRM_ATR_MULT"]
+CDC_BODY_RATIO_MIN: float                   = CONFIG["CDC_BODY_RATIO_MIN"]
 
 SHALLOW_FIB_MIN: float                      = CONFIG["SHALLOW_FIB_MIN"]      # 0.30  (Change 19)
 SHALLOW_FIB_MAX: float                      = CONFIG["SHALLOW_FIB_MAX"]

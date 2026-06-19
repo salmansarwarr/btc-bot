@@ -28,6 +28,7 @@ import ccxt
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from bot.structs import AssetConfig, OHLCV_Bar
+from walk_forward import WINDOWS
 
 # ── Sweep grid ────────────────────────────────────────────────────────────────
 # Each entry: (label, drive_atr, drive_body_ratio, sr_pullback_tol)
@@ -57,7 +58,7 @@ SWEEP = [
 
 WARMUP_DAYS   = 30
 BACKTEST_DAYS = 90
-END_DT = datetime(2026, 6, 13, tzinfo=timezone.utc)
+END_DT = WINDOWS["train"].end
 
 
 # ── Data fetch ────────────────────────────────────────────────────────────────

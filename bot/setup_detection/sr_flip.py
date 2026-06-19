@@ -4,7 +4,10 @@ from datetime import datetime
 from bot.structs import (
     OHLCV_Bar, PivotFlag, Direction, SetupCandidate, SetupType, SetupClass
 )
-from bot.config import SR_FLIP_STOP_ATR_MULT, SR_FLIP_PULLBACK_ATR_TOL
+from bot.config import (
+    SR_FLIP_STOP_ATR_MULT, SR_FLIP_PULLBACK_ATR_TOL,
+    FLIP_CONFIRM_BARS, FLIP_ATR_MULT, FLIP_BODY_RATIO_MIN
+)
 from bot.setup_detection.clean_break import detect_clean_break
 
 def detect_sr_flip(
@@ -19,10 +22,10 @@ def detect_sr_flip(
     Logic:
     1. Look for a major pivot within the lookback window.
     2. Ensure the pivot was 'cleanly broken' by a subsequent candle (detect_clean_break).
-    3. Ensure the current candle (or recent candles) pulled back to the broken pivot.
-    4. Confirm a bounce (current bar closes in the flip direction).
+    3. Ensure the price pulled back to the broken pivot.
+    4. Confirm a bounce (last FLIP_CONFIRM_BARS close in the flip direction with sufficient conviction).
     """
-    if len(bars) < 2 or not pivots or atr <= 0:
+    if len(bars) < max(2, FLIP_CONFIRM_BARS) or not pivots or atr <= 0:
         return []
         
     current_bar = bars[-1]
@@ -75,39 +78,50 @@ def detect_sr_flip(
         if not pulled_back:
             continue
             
-        # Trigger condition: current bar closes in the direction of the new trend
-        if break_dir == Direction.UP:
-            # Long setup
-            if current_bar.close > current_bar.open and current_bar.close > pivot.price:
-                # Part V: SR_FLIP_STOP_ATR_MULT for eventual stop reference
-                stop_price = pivot.price - (SR_FLIP_STOP_ATR_MULT * atr)
-                return [SetupCandidate(
-                    asset=current_bar.asset,
-                    timeframe=current_bar.timeframe,
-                    setup_type=SetupType.SR_FLIP,
-                    setup_class=SetupClass.CONTINUATION,
-                    direction=Direction.UP,
-                    trigger_pivot=pivot,
-                    detected_at=current_bar.timestamp,
-                    detected_bar_index=len(bars) - 1,
-                    trigger_price=current_bar.close,
-                    stop_price=stop_price
-                )]
-        else:
-            # Short setup
-            if current_bar.close < current_bar.open and current_bar.close < pivot.price:
-                stop_price = pivot.price + (SR_FLIP_STOP_ATR_MULT * atr)
-                return [SetupCandidate(
-                    asset=current_bar.asset,
-                    timeframe=current_bar.timeframe,
-                    setup_type=SetupType.SR_FLIP,
-                    setup_class=SetupClass.CONTINUATION,
-                    direction=Direction.DOWN,
-                    trigger_pivot=pivot,
-                    detected_at=current_bar.timestamp,
-                    detected_bar_index=len(bars) - 1,
-                    trigger_price=current_bar.close,
-                    stop_price=stop_price
-                )]
+        # Trigger condition: last FLIP_CONFIRM_BARS close in the direction of the new trend
+        confirm_bars = bars[-FLIP_CONFIRM_BARS:] if FLIP_CONFIRM_BARS > 0 else [current_bar]
+        
+        valid_confirm = True
+        for b in confirm_bars:
+            body_size = abs(b.close - b.open)
+            total_range = b.high - b.low
+            
+            if break_dir == Direction.UP:
+                if b.close <= b.open or b.close <= pivot.price:
+                    valid_confirm = False
+                    break
+            else:
+                if b.close >= b.open or b.close >= pivot.price:
+                    valid_confirm = False
+                    break
+                    
+            if body_size < (FLIP_ATR_MULT * atr):
+                valid_confirm = False
+                break
+                
+            if total_range > 0:
+                if (body_size / total_range) < FLIP_BODY_RATIO_MIN:
+                    valid_confirm = False
+                    break
+            elif FLIP_BODY_RATIO_MIN > 0:
+                valid_confirm = False
+                break
+                
+        if valid_confirm:
+            stop_mult = SR_FLIP_STOP_ATR_MULT * atr
+            stop_price = pivot.price - stop_mult if break_dir == Direction.UP else pivot.price + stop_mult
+            return [SetupCandidate(
+                asset=current_bar.asset,
+                timeframe=current_bar.timeframe,
+                setup_type=SetupType.SR_FLIP,
+                setup_class=SetupClass.CONTINUATION,
+                direction=break_dir,
+                trigger_pivot=pivot,
+                detected_at=current_bar.timestamp,
+                detected_bar_index=len(bars) - 1,
+                trigger_price=current_bar.close,
+                stop_price=stop_price
+            )]
                 
     return []
+

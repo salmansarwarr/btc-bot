@@ -1,0 +1,73 @@
+Python: /usr/bin/python3
+======================================================================
+OUT-OF-SAMPLE VALIDATION
+Window : 2025-12-14 → 2026-03-14 (90 days)
+Warmup : 2025-11-14 → 2025-12-14 (30 days)
+Config : Change 21 — no parameters modified
+======================================================================
+
+Fetching data...
+  H1 bars total: 2880, D1 bars total: 120
+  Warmup bars: 750, OOS bars: 2250
+
+Running warmup pass...
+Warmup complete.
+Running OOS pass...
+OOS pass complete.
+
+──────────────────────────────────────────────────────────────────────
+SUMMARY STATS — OOS WINDOW
+──────────────────────────────────────────────────────────────────────
+  Total Trades       : 150
+  Win Rate           : 38.00%
+  Average R          : +0.3954
+  Engine Max DD      : 25.47%
+  Quick full-stops   : 27 (18.0% of trades)
+  HEAT_CAP skips     : 119
+
+──────────────────────────────────────────────────────────────────────
+CLUSTER ANALYSIS (Change 10 format)
+──────────────────────────────────────────────────────────────────────
+  Segment         Trades   Share   Max DD  PnL share
+  --------------------------------------------------
+  Clustered          102   68.0%   14.34%      20.5%
+  Isolated            48   32.0%    4.21%      79.5%
+
+  Total PnL: $69,998
+
+──────────────────────────────────────────────────────────────────────
+PER-SETUP BREAKDOWN — OOS
+──────────────────────────────────────────────────────────────────────
+  Setup Type                   n      WR    AvgR
+  -----------------------------------------------
+  CDC                         28   35.7%  -0.010
+  OPEN_DRIVE                  35   28.6%  +0.460  ← watch
+  SR_FLIP                     48   47.9%  +0.672
+  MSB_DEEP                    28   35.7%  +0.338
+  MSB_SHALLOW                 11   36.4%  +0.160  ← watch
+  MOMENTUM_DIVERGENCE          —
+  CONSOLIDATION_ENTRY          —
+
+──────────────────────────────────────────────────────────────────────
+OPEN_DRIVE + MSB_SHALLOW — IN-SAMPLE vs OOS COMPARISON
+(Changes 19+21 tightened detection criteria against in-sample data)
+──────────────────────────────────────────────────────────────────────
+  OPEN_DRIVE
+    In-sample (Change 21) : n=24, WR=4580.0%, AvgR=+1.190
+    OOS                   : n=35, WR=28.6%, AvgR=+0.460
+    Delta                 : WR -4551.4pp, AvgR -0.730  → REVERTS
+
+  MSB_SHALLOW
+    In-sample (Change 21) : n=6, WR=6670.0%, AvgR=+0.520
+    OOS                   : n=11, WR=36.4%, AvgR=+0.160
+    Delta                 : WR -6633.6pp, AvgR -0.360  → REVERTS
+
+──────────────────────────────────────────────────────────────────────
+SKIPPED REASONS
+──────────────────────────────────────────────────────────────────────
+  MD_NO_CLUSTER_PEER                  47
+  HEAT_CAP                            119
+
+======================================================================
+END OF OOS REPORT — no tuning actions taken on this result
+======================================================================

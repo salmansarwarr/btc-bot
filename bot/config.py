@@ -59,10 +59,13 @@ CONFIG: Dict[str, Any] = {
     "BREAK_CLOSE_BEYOND_ATR_MULT": 0.15,  # close must be ≥ this × ATR(14) beyond the level
     "BREAK_WICK_RATIO_MAX": 0.25,       # rejection wick / total range must be ≤ this (Proxy C wick filter)
 
-    # ── Stop placement ───────────────────────────────────────────────────────
+    # ── Stop placement / SR_FLIP ─────────────────────────────────────────────
     # Spec §4.2; Resolution I-4 (dedicated parameter for SR_FLIP stop)
     "SR_FLIP_STOP_ATR_MULT": 0.15,      # NEW (I-4): ATR offset below/above the flipped level for SR_FLIP stops
     "SR_FLIP_PULLBACK_ATR_TOL": 0.5,    # tolerance: price must return within this × ATR of the flip level to confirm retest
+    "FLIP_CONFIRM_BARS": 1,             # number of bars to confirm bounce (currently just 1)
+    "FLIP_ATR_MULT": 0.0,               # bounce candle body must be >= this × ATR
+    "FLIP_BODY_RATIO_MIN": 0.50,        # bounce candle body/total-range ratio [Change 22: tightened from 0.0]
     "MIN_STOP_ATR_MULT": 1.2,           # floor: stop cannot be closer than this × ATR(14) to entry
 
     # ── CDC no-interaction buffer ────────────────────────────────────────────
@@ -198,6 +201,9 @@ BREAK_WICK_RATIO_MAX: float                 = CONFIG["BREAK_WICK_RATIO_MAX"]
 
 SR_FLIP_STOP_ATR_MULT: float                = CONFIG["SR_FLIP_STOP_ATR_MULT"]
 SR_FLIP_PULLBACK_ATR_TOL: float             = CONFIG["SR_FLIP_PULLBACK_ATR_TOL"]
+FLIP_CONFIRM_BARS: int                      = CONFIG["FLIP_CONFIRM_BARS"]
+FLIP_ATR_MULT: float                        = CONFIG["FLIP_ATR_MULT"]
+FLIP_BODY_RATIO_MIN: float                  = CONFIG["FLIP_BODY_RATIO_MIN"]
 MIN_STOP_ATR_MULT: float                    = CONFIG["MIN_STOP_ATR_MULT"]
 
 CDC_NO_INTERACTION_ATR_MULT: float          = CONFIG["CDC_NO_INTERACTION_ATR_MULT"]

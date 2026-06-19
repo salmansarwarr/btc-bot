@@ -26,6 +26,7 @@ sys.path.insert(0, ".")
 from bot.config import CONFIG
 from bot.structs import AssetConfig, OHLCV_Bar
 from run_backtest import fetch_all_bars
+from scratch.walk_forward import WINDOWS
 
 # Warmup window: 30 days of H1+D1 bars immediately before the test window.
 # Long enough for ATR(14) and pivot registry to stabilise on D1 bars.
@@ -164,8 +165,9 @@ def run_mode(mode: str, warmup_bars: list, test_bars: list) -> dict:
 
 
 def main():
-    test_end     = datetime(2026, 6, 13, tzinfo=timezone.utc)
-    test_start   = test_end - timedelta(days=90)
+    train_window = WINDOWS["train"]
+    test_start   = train_window.start
+    test_end     = train_window.end
     warmup_start = test_start - timedelta(days=WARMUP_DAYS)
 
     print(f"Loading warmup bars ({WARMUP_DAYS}d before test window)...")

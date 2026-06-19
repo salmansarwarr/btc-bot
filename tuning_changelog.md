@@ -1,6 +1,20 @@
 # Parameter Tuning Changelog
 
-**Fixed Test Window:** 90 Days (Binance BTC/USDT, H1 & D1, ending 2026-06-13)
+**Walk-Forward Protocol:** fixed train/test/holdout windows. Tune only on TRAIN.
+TEST/OOS is touched once per major milestone. HOLDOUT is untouched until final
+validation before paper trading.
+
+| Split | Window | Use |
+| ----- | ------ | --- |
+| TRAIN / in-sample | 2026-03-15 -> 2026-06-13 | All iterative parameter changes and sweeps |
+| TEST / OOS | 2025-12-14 -> 2026-03-14 | One generalization check per major milestone |
+| FINAL HOLDOUT | 2025-09-15 -> 2025-12-14 | Final pre-paper validation only |
+
+Canonical runner:
+
+- Train/tuning: `python3 scratch/walk_forward.py --split train`
+- Milestone OOS check: `python3 scratch/walk_forward.py --split test --milestone "Change XX"`
+- Final holdout: `python3 scratch/walk_forward.py --split holdout --final-validation --milestone "pre-paper"`
 
 ### Baseline Performance
 
@@ -532,7 +546,44 @@ Conviction analysis produced 86 trades vs 93 in Change 19 sweep. Likely caused b
 - [x] ~~MSB_DEEP cluster gate.~~ ❌ **Change 17 — reverted.**
 - [x] ~~Fib/detection parameter sweep for MSB_SHALLOW.~~ ✅ **Change 19 — `SHALLOW_FIB_MIN=0.30`, `SHALLOW_ATR_CAP_MULT=2.0`.**
 - [x] ~~Conviction score threshold.~~ ❌ **Change 20 — exhausted.**
-- [x] ~~OPEN_DRIVE detection tightening.~~ ✅ **Change 21 — `DRIVE_ATR_MULT=1.2`, `DRIVE_BODY_RANGE_RATIO_MIN=0.65`.**
-- **[Next]** SR_FLIP detection tightening — identify the weakest flip confirmation criteria. Candidate params: `FLIP_CONFIRM_BARS`, `FLIP_ATR_MULT`, `FLIP_BODY_RATIO_MIN`.
-- **[Defer]** MSB_DEEP target sweep — lower priority since WR is strong; investigate after SR_FLIP.
+- [x] ~~OPEN_DRIVE detection tightening.~~ ✅ **Change 21 — `DRIVE_ATR_MULT=1.2`, `DRIVE_BODY_RANGE_RATIO_MIN=0.65`**
+- [x] ~~SR_FLIP anchor matrix check.~~ ✅ **Milestone OOS check completed.**
+- [x] ~~SR_FLIP detection tightening.~~ ✅ **Change 22 — `FLIP_BODY_RATIO_MIN=0.50`.**
+- **[Next]** MSB_DEEP target sweep — investigate `DEEP_FIB_MIN` / `DEEP_FIB_MAX` or target multiples to improve AvgR (currently +0.67 on high WR).
 - **[Defer]** CDC detection tightening — low trade count (16) makes statistical inference weak; defer until more data.
+
+---
+
+### Milestone: SR_FLIP Anchor Matrix (OOS Check)
+
+- **Type:** Generalization check on TEST/OOS (`2025-12-14` -> `2026-03-14`)
+- **Protocol:** `python3 scratch/run_anchor_matrix.py`
+- **Reasoning:** To verify if the portfolio heat behavior holds out-of-sample by fixing `SR_FLIP` as the baseline anchor and evaluating marginal contributions of other setups.
+- **TRAIN Finalists (passed rule: PnL > SR, AvgR > 0, MaxDD <= 13.69%):**
+  - `SR+CONSOLIDATION_ENTRY`
+  - `SR+MSB_DEEP`
+- **TEST/OOS Stats:**
+  - `SR_ONLY`: Trades 60, WR 43.33%, AvgR +0.6881, MaxDD 20.80%
+  - `SR+CONSOLIDATION_ENTRY`: Trades 61, WR 44.26%, AvgR +0.7354, MaxDD 20.80% (Marginal PnL: +$4,078)
+  - `SR+MSB_DEEP`: Trades 90, WR 43.33%, AvgR +0.5709, MaxDD 26.79% (Marginal PnL: +$14,932)
+- **Takeaways:** `SR_FLIP` maintains positive expectancy out-of-sample (+0.6881 AvgR), though win rate is softer (43.33%). Adding `MSB_DEEP` increased trades and PnL but caused the OOS MaxDD to spike to 26.79%, mirroring the concurrent exposure issues seen in the Train set. We proceed with `SR_FLIP` detection tightening to build a stronger baseline win rate.
+
+---
+
+### Change 22: SR_FLIP Detection Tightening
+
+- **Proxy Parameters:** `FLIP_CONFIRM_BARS`, `FLIP_ATR_MULT`, `FLIP_BODY_RATIO_MIN` (Newly implemented in `sr_flip.py`)
+- **Original Values:** Implicitly `1`, `0.0`, `0.0`
+- **New Value:** `FLIP_BODY_RATIO_MIN=0.50`
+- **Reasoning:** Following the success of OPEN_DRIVE tightening (Change 21), we introduced analogous confirmation constraints for SR_FLIP's bounce candle to filter weak signals without gating admitted trades. We swept ATR vs Body Ratio vs multi-bar confirmation.
+- **Before Stats (Change 21):** Trades 92, WR 51.09%, Avg R +0.82, Engine DD 17.20% (SR_FLIP WR: 45.8%)
+- **After Stats:** Trades 109, WR 54.13%, Avg R +0.76, Engine DD 13.73% (SR_FLIP WR: 59.1%)
+
+| Configuration | Trades | WR | AvgR | EngDD | SR Trades | SR WR | SR AvgR |
+|---|---|---|---|---|---|---|---|
+| baseline | 92 | 51.1% | +0.82 | 17.20% | 24 | 45.8% | +0.47 |
+| `atr_1.0` | 107 | 49.5% | +0.65 | 24.31% ⚠️ | 7 | 28.6% | -0.33 |
+| `bars_2` | 113 | 52.2% | +0.70 | 13.05% | 22 | 54.5% | +0.53 |
+| **`body_0.50`** ✅ | 109 | **54.1%** | +0.76 | **13.73%** | 22 | **59.1%** | +0.50 |
+
+- **Verdict:** Keeping `FLIP_BODY_RATIO_MIN=0.50`. Tightening the ATR multiplier on the confirmation candle caused a massive concurrent exposure Engine DD spike (24.31%)—the same failure mode seen in previous gating attempts. However, enforcing that the confirmation candle has directional conviction (body > 50% of range) improved SR_FLIP's WR from 45.8% to 59.1% and dropped Engine DD from 17.20% to 13.73% while actually *increasing* total portfolio trades (92 → 109) and overall portfolio WR (51.1% → 54.1%).

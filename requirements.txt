@@ -1,0 +1,11 @@
+# Core Libraries
+numpy==2.2.6
+pandas==2.3.3
+
+# Technical Analysis & Exchange Interaction
+ccxt==4.5.58
+ta==0.11.0
+
+# Visualization & Network
+plotly==6.8.0
+requests==2.32.5

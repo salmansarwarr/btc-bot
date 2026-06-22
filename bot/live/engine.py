@@ -33,10 +33,11 @@ class LiveEngine:
         ohlcv = self.exchange.fetch_ohlcv(self.asset, self.timeframe, limit=limit)
         bars = []
         for row in ohlcv:
+            dt = datetime.fromtimestamp(row[0] / 1000.0, tz=timezone.utc)
             bars.append(OHLCV_Bar(
                 asset=self.asset.split("/")[0],
                 timeframe="H1",
-                timestamp=row[0],
+                timestamp=dt,
                 open=row[1], high=row[2], low=row[3], close=row[4], volume=row[5]
             ))
         return bars
@@ -119,10 +120,10 @@ class LiveEngine:
                     now = datetime.now(timezone.utc)
                     # Next hour boundary
                     next_hour = now.replace(minute=0, second=5, microsecond=0)
-                    if now.minute > 0 or now.second > 5:
+                    if now >= next_hour:
                         next_hour = (now + timedelta(hours=1)).replace(minute=0, second=5, microsecond=0)
                     
-                    sleep_sec = (next_hour - now).total_seconds()
+                    sleep_sec = max(0.0, (next_hour - now).total_seconds())
                     logger.info(f"Sleeping {sleep_sec:.1f}s until next bar close at {next_hour}")
                     time.sleep(sleep_sec)
                 else:
@@ -136,11 +137,11 @@ class LiveEngine:
                 bar = OHLCV_Bar(
                     asset=self.asset.split("/")[0],
                     timeframe="H1",
-                    timestamp=closed_row[0],
+                    timestamp=datetime.fromtimestamp(closed_row[0] / 1000.0, tz=timezone.utc),
                     open=closed_row[1], high=closed_row[2], low=closed_row[3], close=closed_row[4], volume=closed_row[5]
                 )
                 
-                logger.info(f"Processing live bar: {datetime.fromtimestamp(bar.timestamp/1000, tz=timezone.utc)} | Close: {bar.close}")
+                logger.info(f"Processing live bar: {bar.timestamp} | Close: {bar.close}")
                 
                 # 3. Process the bar through the identical engine logic
                 self.engine.step(bar, oi=0.0, liq=0.0)

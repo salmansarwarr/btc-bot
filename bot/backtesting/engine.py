@@ -389,7 +389,8 @@ class BacktestEngine:
         check_drawdown_tier(self.portfolio, self.event_journal)
 
         equity_30d_ago  = self.portfolio.equity
-        thirty_days_ago_ms = now - 30 * 86400 * 1000
+        now_ms = now.timestamp() * 1000 if isinstance(now, datetime) else now
+        thirty_days_ago_ms = now_ms - 30 * 86400 * 1000
         for t, eq in reversed(self.equity_history):
             t_ms = t.timestamp() * 1000 if isinstance(t, datetime) else t
             if t_ms <= thirty_days_ago_ms:

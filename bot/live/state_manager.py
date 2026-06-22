@@ -2,6 +2,7 @@ import json
 import os
 import time
 import logging
+from datetime import datetime
 from typing import Dict, Any, List
 
 logger = logging.getLogger(__name__)
@@ -10,15 +11,21 @@ STATE_FILE = "live_state.json"
 import base64
 import pickle
 
-def save_state(engine, last_bar_timestamp: int):
+def save_state(engine, last_bar_timestamp):
     """Serialize system state to disk safely."""
     
+    # Normalize timestamp — accept either datetime or int ms
+    if isinstance(last_bar_timestamp, datetime):
+        ts_serializable = last_bar_timestamp.isoformat()
+    else:
+        ts_serializable = last_bar_timestamp
+
     # We serialize basic metadata and safely pickle the entire portfolio state
     portfolio_b64 = base64.b64encode(pickle.dumps(engine.portfolio)).decode('utf-8')
     journal_b64 = base64.b64encode(pickle.dumps(engine.trade_journal)).decode('utf-8')
             
     state = {
-        "last_bar_timestamp": last_bar_timestamp,
+        "last_bar_timestamp": ts_serializable,
         "portfolio_b64": portfolio_b64,
         "journal_b64": journal_b64,
         "saved_at": int(time.time() * 1000)
@@ -26,7 +33,7 @@ def save_state(engine, last_bar_timestamp: int):
     
     with open(STATE_FILE, "w") as f:
         json.dump(state, f, indent=2)
-    logger.debug(f"State saved at {last_bar_timestamp}")
+    logger.debug(f"State saved at {ts_serializable}")
 
 def load_state(max_age_ms: int = 7200000) -> Dict[str, Any]:
     """Load system state if it exists and is fresh enough (default 2 hours)."""

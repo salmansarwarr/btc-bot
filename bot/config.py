@@ -130,8 +130,8 @@ CONFIG: Dict[str, Any] = {
     # ── Live Trading / Execution ─────────────────────────────────────────────
     "PAPER_TRADING": True,                      # Set to True to simulate orders internally without ccxt calls
     "EXCHANGE_BASE_URL": "https://api.binance.com/api", # Use testnet.binance.vision/api for testnet
-    "TELEGRAM_BOT_TOKEN": "",                   # Alerting bot token
-    "TELEGRAM_CHAT_ID": "",                     # Alerting chat id
+    "TELEGRAM_BOT_TOKEN": "7632341268:AAGd_URy_yqWRe0pzbIpTT0Bn9SoNRLtTQY",                   # Alerting bot token
+    "TELEGRAM_CHAT_ID": "7492181702",                     # Alerting chat id
 
     # ── Portfolio ATH realization ────────────────────────────────────────────
     # Spec §8.x; Doc-2 §13 (Proxy A primary + B backstop)

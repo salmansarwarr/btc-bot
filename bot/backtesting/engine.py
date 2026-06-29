@@ -412,6 +412,27 @@ class BacktestEngine:
             bars, pivots, atr, config, feeds.get(asset), self.market_basket, trend_class
         )
 
+        # ADD THIS
+        import logging
+        _dbg = logging.getLogger("debug")
+        
+        all_open_trades = {**self.portfolio.open_trades, **self._newly_opened}
+        total_open_risk_usd = sum(
+            t._heat_risk_usd if t._heat_risk_usd > 0 else t.initial_risk_usd
+            for t in all_open_trades.values()
+        )
+        current_heat = total_open_risk_usd / self.portfolio.equity if self.portfolio.equity > 0 else 0.0
+        
+        _dbg.info(f"BAR {bar.timestamp} | candidates={len(candidates)} | "
+                  f"open_trades={len(self.portfolio.open_trades)} | "
+                  f"heat={current_heat:.4f} | "
+                  f"htf_bias={current_bias}")
+        for c in candidates:
+            # Temporary calculate conviction for accurate logging (will be overwritten in evaluate_entry next bar)
+            from bot.entry_risk.conviction import compute_conviction_score
+            compute_conviction_score(c, current_bias, bars)
+            _dbg.info(f"  CANDIDATE: {c.setup_type} {c.direction} | conviction={c.conviction_score}")
+
         # ── 9. Dedup and queue accepted candidates for next-bar fill
         for cand in candidates:
             key = self._dedup_key(cand)

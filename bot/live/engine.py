@@ -30,7 +30,7 @@ class LiveEngine:
         """Fetch historical bars for warmup."""
         logger.info(f"Fetching {limit} historical bars for warmup...")
         # Placeholder for real ccxt fetch_ohlcv implementation
-        ohlcv = self.exchange.fetch_ohlcv(self.asset, self.timeframe, limit=limit)
+        ohlcv = self.exchange.fetch_ohlcv(self.asset, "1h", limit=limit)
         bars = []
         for row in ohlcv:
             dt = datetime.fromtimestamp(row[0] / 1000.0, tz=timezone.utc)
@@ -40,6 +40,20 @@ class LiveEngine:
                 timestamp=dt,
                 open=row[1], high=row[2], low=row[3], close=row[4], volume=row[5]
             ))
+            
+        d1_limit = (limit // 24) + 10
+        d1_ohlcv = self.exchange.fetch_ohlcv(self.asset, "1d", limit=d1_limit)
+        for row in d1_ohlcv:
+            dt = datetime.fromtimestamp(row[0] / 1000.0, tz=timezone.utc)
+            bars.append(OHLCV_Bar(
+                asset=self.asset.split("/")[0],
+                timeframe="D1",
+                timestamp=dt,
+                open=row[1], high=row[2], low=row[3], close=row[4], volume=row[5]
+            ))
+            
+        # Sort them by timestamp, and if same timestamp, D1 after H1
+        bars.sort(key=lambda b: (b.timestamp.timestamp(), 1 if b.timeframe == 'D1' else 0))
         return bars
         
     def warmup(self):
@@ -131,7 +145,7 @@ class LiveEngine:
                 
                 # 2. Fetch the just-closed bar
                 # We fetch the last 2 bars to ensure we get the fully closed one
-                ohlcv = self.exchange.fetch_ohlcv(self.asset, self.timeframe, limit=2)
+                ohlcv = self.exchange.fetch_ohlcv(self.asset, "1h", limit=2)
                 closed_row = ohlcv[-2] # The bar that just closed
                 
                 bar = OHLCV_Bar(
@@ -141,10 +155,35 @@ class LiveEngine:
                     open=closed_row[1], high=closed_row[2], low=closed_row[3], close=closed_row[4], volume=closed_row[5]
                 )
                 
-                logger.info(f"Processing live bar: {bar.timestamp} | Close: {bar.close}")
+                logger.info(f"Processing live bar: {bar.timestamp} | Close: {bar.close} | TF: H1")
                 
                 # 3. Process the bar through the identical engine logic
                 self.engine.step(bar, oi=0.0, liq=0.0)
+                
+                if bar.timestamp.hour == 23:
+                    # Fetch extra bars to ensure we find the exact D1 bar for this date, 
+                    # protecting against exchange API rollover delays at 00:00.
+                    d1_ohlcv = self.exchange.fetch_ohlcv(self.asset, "1d", limit=3)
+                    
+                    target_date = bar.timestamp.date()
+                    d1_closed_row = None
+                    for row in d1_ohlcv:
+                        row_dt = datetime.fromtimestamp(row[0] / 1000.0, tz=timezone.utc)
+                        if row_dt.date() == target_date:
+                            d1_closed_row = row
+                            break
+                            
+                    if d1_closed_row:
+                        d1_bar = OHLCV_Bar(
+                            asset=self.asset.split("/")[0],
+                            timeframe="D1",
+                            timestamp=datetime.fromtimestamp(d1_closed_row[0] / 1000.0, tz=timezone.utc),
+                            open=d1_closed_row[1], high=d1_closed_row[2], low=d1_closed_row[3], close=d1_closed_row[4], volume=d1_closed_row[5]
+                        )
+                        logger.info(f"D1 fetch | bar_time={d1_bar.timestamp} | close={d1_bar.close}")
+                        self.engine.step(d1_bar, oi=0.0, liq=0.0)
+                    else:
+                        logger.error(f"Failed to find D1 bar for date {target_date} in exchange response.")
                 
                 # 4. Enforce Trading Guidelines
                 self.monitor_guidelines()

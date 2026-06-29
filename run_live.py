@@ -13,6 +13,12 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(name)s | %(levelname)s | %(message)s"
 )
+
+logging.getLogger("debug").setLevel(logging.DEBUG)
+# add a handler pointing to debug.log
+fh2 = logging.FileHandler("debug.log")
+logging.getLogger("debug").addHandler(fh2)
+
 logger = logging.getLogger("main")
 
 def main():

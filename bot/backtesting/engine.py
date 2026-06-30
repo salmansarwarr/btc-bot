@@ -12,6 +12,7 @@ Structural fix (post Change 7):
 - trend_class passed into _flush_pending_fills so pending fills also
   respect the current trend classification.
 """
+from bot.structs import Direction
 from typing import List, Dict, Any, Optional, Set, Tuple
 from datetime import datetime, timezone, timedelta
 from collections import defaultdict
